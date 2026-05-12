@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彝族数字图腾 - 沉浸式粒子宇宙</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Courier New', monospace;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        #ui-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 26, 26, 0.4);
+            box-shadow: 0 8px 32px rgba(139, 26, 26, 0.3);
+            pointer-events: auto;
+        }
+        .neon-text {
+            text-shadow: 0 0 10px #8B1A1A, 0 0 20px #8B1A1A, 0 0 40px #FF8C00;
+        }
+        .gold-glow {
+            text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+        }
+        .control-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 140, 0, 0.4), transparent);
+            transition: left 0.5s;
+        }
+        .control-btn:hover::before {
+            left: 100%;
+        }
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(139, 26, 26, 0.6);
+        }
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s;
+        }
+        .loader-ring {
+            width: 100px;
+            height: 100px;
+            border: 3px solid transparent;
+            border-top: 3px solid #8B1A1A;
+            border-right: 3px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(139, 26, 26, 0.3);
+            animation: scan 3s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loader-ring mb-4"></div>
+        <div class="text-[#8B1A1A] text-lg tracking-widest">初始化粒子宇宙...</div>
+        <div class="text-gray-600 text-sm mt-2">INITIALIZING YI DIGITAL TOTEM</div>
+    </div>
+
+    <!-- p5 Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Scan Line Effect -->
+    <div class="scan-line"></div>
+
+    <!-- UI Layer -->
+    <div id="ui-layer" class="flex flex-col justify-between p-6">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-start">
+            <div class="glass-panel p-6 rounded-lg max-w-md">
+                <h1 class="text-3xl font-bold text-[#FFD700] mb-1 tracking-widest neon-text">彝族数字图腾</h1>
+                <div class="text-[#8B1A1A] text-xs tracking-[0.3em] mb-3">YI ETHNIC DIGITAL TOTEM</div>
+                <div class="h-px w-full bg-gradient-to-r from-[#8B1A1A] via-[#FFD700] to-transparent mb-4"></div>
+                
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <div class="text-gray-500">粒子数量</div>
+                        <div class="text-[#FF8C00] font-mono text-lg" id="particle-count">0</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-500">音频频率</div>
+                        <div class="text-[#FF8C00] font-mono text-lg" id="audio-freq">0 Hz</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-500">旋转速度</div>
+                        <div class="text-[#FF8C00] font-mono text-lg" id="rot-speed">1.0x</div>
+                    </div>
+                    <div>
+                        <div class="text-gray-500">能量等级</div>
+                        <div class="text-[#FF8C00] font-mono text-lg" id="energy-level">NORMAL</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-lg">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-xs text-gray-400">SYSTEM ONLINE</span>
+                </div>
+                <div class="text-[10px] text-gray-600 font-mono">
+                    FPS: <span id="fps-display" class="text-[#FFD700]">60</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Controls -->
+        <div class="absolute top-1/2 left-6 transform -translate-y-1/2 space-y-3">
+            <button onclick="toggleAudio()" class="control-btn glass-panel p-3 rounded-lg block w-12 h-12 flex items-center justify-center text-[#FFD700] hover:text-white" title="开启/关闭音频">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                </svg>
+            </button>
+            <button onclick="changeMode('fire')" class="control-btn glass-panel p-3 rounded-lg block w-12 h-12 flex items-center justify-center text-[#8B1A1A] hover:text-white" title="火焰模式">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                </svg>
+            </button>
+            <button onclick="changeMode('water')" class="control-btn glass-panel p-3 rounded-lg block w-12 h-12 flex items-center justify-center text-blue-500 hover:text-white" title="流水模式">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </button>
+            <button onclick="changeMode('void')" class="control-btn glass-panel p-3 rounded-lg block w-12 h-12 flex items-center justify-center text-purple-500 hover:text-white" title="虚空模式">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="flex justify-center items-end gap-4">
+            <div class="glass-panel px-6 py-4 rounded-2xl flex gap-6 items-center">
+                <div class="flex flex-col items-center gap-2">
+                    <label class="text-[10px] text-gray-500 tracking-widest">粒子密度</label>
+                    <input type="range" min="1" max="100" value="50" class="w-32 accent-[#8B1A1A]" oninput="updateDensity(this.value)">
+                </div>
+                <div class="w-px h-8 bg-gray-700"></div>
+                <div class="flex flex-col items-center gap-2">
+                    <label class="text-[10px] text-gray-500 tracking-widest">混沌程度</label>
+                    <input type="range" min="0" max="100" value="20" class="w-32 accent-[#FFD700]" oninput="updateChaos(this.value)">
+                </div>
+                <div class="w-px h-8 bg-gray-700"></div>
+                <button onclick="resetSystem()" class="control-btn px-6 py-2 rounded-lg border border-[#8B1A1A] text-[#8B1A1A] text-sm hover:bg-[#8B1A1A] hover:text-black transition-all">
+                    重置系统
+                </button>
+                <button onclick="explode()" class="control-btn px-6 py-2 rounded-lg bg-[#8B1A1A] text-white text-sm hover:bg-[#FF8C00] transition-all">
+                    能量爆发
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let particles = [];
+        let flowField = [];
+        let cols, rows;
+        let scale = 20;
+        let zoff = 0;
+        let font;
+        let audioStarted = false;
+        let synth, drone, metal;
+        let fft, waveform;
+        let currentMode = 'fire';
+        let chaosLevel = 0.2;
+        let densityLevel = 0.5;
+        let explosionForce = 0;
+        let rotationOffset = 0;
+        let targetRotation = 0;
+        
+        // Color Palettes
+        const palettes = {
+            fire: {
+                primary: [139, 26, 26],    // 彝族暗红
+                secondary: [255, 140, 0],  // 橙红
+                accent: [255, 215, 0],     // 鎏金
+                bg: [5, 5, 5]
+            },
+            water: {
+                primary: [0, 100, 150],
+                secondary: [0, 200, 255],
+                accent: [255, 255, 255],
+                bg: [0, 10, 20]
+            },
+            void: {
+                primary: [75, 0, 130],
+                secondary: [148, 0, 211],
+                accent: [255, 0, 255],
+                bg: [0, 0, 0]
+            }
+        };
+
+        // p5.js Setup
+        function setup() {
+            let canvas = createCanvas(windowWidth, windowHeight);
+            canvas.parent('canvas-container');
+            colorMode(RGB);
+            
+            // Initialize Flow Field
+            cols = floor(width / scale);
+            rows = floor(height / scale);
+            flowField = new Array(cols * rows);
+            
+            // Create Particles
+            initParticles();
+            
+            // Setup Audio
+            setupAudio();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 1000);
+            }, 1500);
+        }
+
+        function initParticles() {
+            particles = [];
+            let count = floor(2000 * densityLevel);
+            
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+            
+            document.getElementById('particle-count').innerText = count;
+        }
+
+        function setupAudio() {
+            // Tone.js setup
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "fatsawtooth" },
+                envelope: { attack: 0.1, decay: 0.3, sustain: 0.5, release: 1 }
+            }).toDestination();
+            
+            drone = new Tone.Player("https://tonejs.github.io/audio/berklee/gong_1.mp3").toDestination();
+            drone.loop = true;
+            drone.volume.value = -20;
+            
+            fft = new Tone.FFT(64);
+            waveform = new Tone.Waveform(64);
+            Tone.Destination.connect(fft);
+            Tone.Destination.connect(waveform);
+        }
+
+        // Particle Class
+        class Particle {
+            constructor() {
+                this.reset();
+                this.vel = p5.Vector.random2D();
+                this.acc = createVector(0, 0);
+                this.maxSpeed = random(2, 5);
+                this.prevPos = this.pos.copy();
+                this.life = random(100, 255);
+                this.decay = random(0.5, 2);
+                this.size = random(1, 4);
+                this.angle = random(TWO_PI);
+                this.angleVel = random(-0.1, 0.1);
+            }
+            
+            reset() {
+                // Create Yi pattern distribution
+                let angle = random(TWO_PI);
+                let r = randomGaussian(0, height/6);
+                
+                // Add pattern structure (6-fold symmetry)
+                let patternAngle = angle * 6;
+                let patternMod = sin(patternAngle);
+                
+                if (abs(patternMod) > 0.7 || random() < 0.1) {
+                    // Dense area (pattern lines)
+                    this.pos = createVector(
+                        width/2 + cos(angle) * abs(r),
+                        height/2 + sin(angle) * abs(r)
+                    );
+                } else {
+                    // Sparse area
+                    this.pos = createVector(random(width), random(height));
+                }
+                
+                this.prevPos = this.pos.copy();
+                this.life = 255;
+            }
+            
+            follow(vectors) {
+                let x = floor(this.pos.x / scale);
+                let y = floor(this.pos.y / scale);
+                let index = x + y * cols;
+                index = constrain(index, 0, vectors.length - 1);
+                let force = vectors[index];
+                if (force) {
+                    this.applyForce(force);
+                }
+            }
+            
+            applyForce(force) {
+                this.acc.add(force);
+            }
+            
+            update() {
+                this.vel.add(this.acc);
+                this.vel.limit(this.maxSpeed * (1 + chaosLevel));
+                this.pos.add(this.vel);
+                this.acc.mult(0);
+                this.life -= this.decay;
+                this.angle += this.angleVel;
+                
+                // Audio reactivity
+                if (audioStarted && fft) {
+                    let freq = fft.getValue();
+                    let avgFreq = freq.reduce((a, b) => a + b, 0) / freq.length;
+                    this.maxSpeed = map(avgFreq, -100, -30, 2, 8);
+                }
+                
+                // Explosion effect
+                if (explosionForce > 0) {
+                    let center = createVector(width/2, height/2);
+                    let dir = p5.Vector.sub(this.pos, center);
+                    dir.normalize();
+                    dir.mult(explosionForce);
+                    this.applyForce(dir);
+                }
+            }
+            
+            edges() {
+                if (this.pos.x > width || this.pos.x < 0 || 
+                    this.pos.y > height || this.pos.y < 0 || 
+                    this.life < 0) {
+                    this.reset();
+                }
+            }
+            
+            show() {
+                let pal = palettes[currentMode];
+                
+                // Dynamic color based on life and position
+                let r = map(this.life, 0, 255, pal.primary[0], pal.secondary[0]);
+                let g = map(this.life, 0, 255, pal.primary[1], pal.secondary[1]);
+                let b = map(this.life, 0, 255, pal.primary[2], pal.secondary[2]);
+                
+                // Add gold accent for center particles
+                let d = dist(this.pos.x, this.pos.y, width/2, height/2);
+                if (d < 50) {
+                    r = pal.accent[0];
+                    g = pal.accent[1];
+                    b = pal.accent[2];
+                }
+                
+                stroke(r, g, b, this.life);
+                strokeWeight(this.size);
+                
+                // Draw line from previous position for trail effect
+                line(this.pos.x, this.pos.y, this.prevPos.x, this.prevPos.y);
+                
+                // Draw glowing head
+                if (this.life > 200) {
+                    stroke(pal.accent[0], pal.accent[1], pal.accent[2], this.life * 0.5);
+                    strokeWeight(this.size * 2);
+                    point(this.pos.x, this.pos.y);
+                }
+                
+                this.prevPos = this.pos.copy();
+            }
+        }
+
+        // Draw Function
+        function draw() {
+            // Fade effect for trails
+            let pal = palettes[currentMode];
+            background(pal.bg[0], pal.bg[1], pal.bg[2], 20);
+            
+            // Update Flow Field
+            let yoff = 0;
+            for (let y = 0; y < rows; y++) {
+                let xoff = 0;
+                for (let x = 0; x < cols; x++) {
+                    let index = x + y * cols;
+                    
+                    // Complex noise function for flow field
+                    let angle = noise(xoff, yoff, zoff) * TWO_PI * 4;
+                    
+                    // Add rotational symmetry (Yi pattern characteristic)
+                    let centerX = width/2 / scale;
+                    let centerY = height/2 / scale;
+                    let dx = x - centerX;
+                    let dy = y - centerY;
+                    let distFromCenter = sqrt(dx*dx + dy*dy);
+                    let rotAngle = atan2(dy, dx) + rotationOffset;
+                    
+                    // Combine noise with radial pattern
+                    angle += rotAngle * 3;
+                    angle += sin(distFromCenter * 0.1 - zoff * 2) * PI;
+                    
+                    let v = p5.Vector.fromAngle(angle);
+                    v.setMag(0.5);
+                    flowField[index] = v;
+                    
+                    xoff += 0.1;
+                }
+                yoff += 0.1;
+            }
+            zoff += 0.005;
+            
+            // Smooth rotation
+            rotationOffset += (targetRotation - rotationOffset) * 0.05;
+            
+            // Update and display particles
+            push();
+            translate(width/2, height/2);
+            rotate(rotationOffset * 0.5);
+            translate(-width/2, -height/2);
+            
+            for (let p of particles) {
+                p.follow(flowField);
+                p.update();
+                p.edges();
+                p.show();
+            }
+            pop();
+            
+            // Draw Yi Pattern Overlay (Geometric construction)
+            drawYiGeometry();
+            
+            // Update UI
+            updateUI();
+            
+            // Decay explosion
+            if (explosionForce > 0) {
+                explosionForce *= 0.95;
+                if (explosionForce < 0.1) explosionForce = 0;
+            }
+        }
+
+        function drawYiGeometry() {
+            let pal = palettes[currentMode];
+            push();
+            translate(width/2, height/2);
+            
+            noFill();
+            strokeWeight(2);
+            
+            // Outer rotating rings
+            for (let i = 0; i < 3; i++) {
+                let r = 150 + i * 50 + sin(frameCount * 0.02 + i) * 10;
+                stroke(pal.accent[0], pal.accent[1], pal.accent[2], 100 - i * 20);
+                
+                beginShape();
+                for (let a = 0; a < TWO_PI; a += 0.1) {
+                    // Create 6-fold symmetry pattern
+                    let sym = sin(a * 6 + frameCount * 0.01);
+                    let radius = r + sym * 20;
+                    let x = cos(a + rotationOffset * (i+1)) * radius;
+                    let y = sin(a + rotationOffset * (i+1)) * radius;
+                    vertex(x, y);
+                }
+                endShape(CLOSE);
+            }
+            
+            // Inner core (Golden center)
+            fill(pal.accent[0], pal.accent[1], pal.accent[2], 200);
+            noStroke();
+            for (let i = 0; i < 6; i++) {
+                let angle = (TWO_PI / 6) * i + rotationOffset;
+                let x = cos(angle) * 30;
+                let y = sin(angle) * 30;
+                circle(x, y, 10 + sin(frameCount * 0.1) * 5);
+            }
+            
+            // Connecting lines (The "Fire" pattern)
+            stroke(pal.primary[0], pal.primary[1], pal.primary[2], 150);
+            strokeWeight(1);
+            for (let i = 0; i < 6; i++) {
+                let angle1 = (TWO_PI / 6) * i + rotationOffset;
+                let angle2 = (TWO_PI / 6) * (i+2) + rotationOffset;
+                let x1 = cos(angle1) * 80;
+                let y1 = sin(angle1) * 80;
+                let x2 = cos(angle2) * 80;
+                let y2 = sin(angle2) * 80;
+                line(x1, y1, x2, y2);
+            }
+            
+            pop();
+        }
+
+        function updateUI() {
+            // Update FPS
+            if (frameCount % 10 === 0) {
+                document.getElementById('fps-display').innerText = floor(frameRate());
+            }
+            
+            // Update audio display
+            if (audioStarted && fft) {
+                let val = fft.getValue();
+                let freq = floor(abs(val[10]) * 10);
+                document.getElementById('audio-freq').innerText = freq + ' Hz';
+                
+                // Update energy level based on frequency
+                let energy = 'NORMAL';
+                if (freq > 80) energy = 'HIGH';
+                if (freq > 120) energy = 'CRITICAL';
+                document.getElementById('energy-level').innerText = energy;
+                document.getElementById('energy-level').style.color = freq > 100 ? '#FF0000' : '#FF8C00';
+            }
+            
+            // Rotation speed display
+            let speed = (targetRotation - rotationOffset) * 100;
+            document.getElementById('rot-speed').innerText = speed.toFixed(1) + 'x';
+        }
+
+        // Interaction Functions
+        function mouseDragged() {
+            let deltaX = mouseX - pmouseX;
+            targetRotation += deltaX * 0.01;
+            return false;
+        }
+
+        function mouseWheel(event) {
+            // Zoom effect by adjusting particle speed/scale
+            let zoom = event.delta > 0 ? 0.9 : 1.1;
+            for (let p of particles) {
+                p.maxSpeed *= zoom;
+            }
+            return false;
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+            cols = floor(width / scale);
+            rows = floor(height / scale);
+            flowField = new Array(cols * rows);
+        }
+
+        // Control Functions
+        function toggleAudio() {
+            if (!audioStarted) {
+                Tone.start();
+                audioStarted = true;
+                
+                // Play drone
+                // drone.start(); // Uncomment if you have a valid audio file
+                
+                // Play sequence
+                let pattern = new Tone.Pattern((time, note) => {
+                    synth.triggerAttackRelease(note, "8n", time);
+                }, ["C3", "E3", "G3", "B3", "D4"], "upDown");
+                pattern.interval = "8n";
+                pattern.start(0);
+                Tone.Transport.start();
+                
+            } else {
+                Tone.Transport.stop();
+                audioStarted = false;
+            }
+        }
+
+        function changeMode(mode) {
+            currentMode = mode;
+            
+            // Audio feedback
+            if (audioStarted) {
+                let notes = { fire: "C4", water: "E4", void: "G4" };
+                synth.triggerAttackRelease(notes[mode], "4n");
+            }
+            
+            // Visual transition
+            for (let p of particles) {
+                p.life = random(50, 150);
+            }
+        }
+
+        function updateDensity(val) {
+            densityLevel = val / 100;
+            if (particles.length < 2000 * densityLevel) {
+                for (let i = 0; i < 50; i++) {
+                    particles.push(new Particle());
+                }
+            } else if (particles.length > 2000 * densityLevel) {
+                particles.splice(0, 50);
+            }
+            document.getElementById('particle-count').innerText = particles.length;
+        }
+
+        function updateChaos(val) {
+            chaosLevel = val / 100;
+        }
+
+        function resetSystem() {
+            targetRotation = 0;
+            explosionForce = 0;
+            zoff = 0;
+            initParticles();
+            if (audioStarted) {
+                Tone.Transport.stop();
+                Tone.Transport.start();
+            }
+        }
+
+        function explode() {
+            explosionForce = 50;
+            
+            // Audio explosion
+            if (audioStarted) {
+                let noise = new Tone.NoiseSynth({
+                    noise: { type: 'brown' },
+                    envelope: { attack: 0.005, decay: 0.3, sustain: 0 }
+                }).toDestination();
+                noise.triggerAttackRelease("8n");
+            }
+            
+            // Visual flash
+            background(255, 255, 255, 50);
+        }
+
+        // Keyboard controls
+        function keyPressed() {
+            if (key === ' ') {
+                toggleAudio();
+            }
+            if (key === 'f') {
+                changeMode('fire');
+            }
+            if (key === 'w') {
+                changeMode('water');
+            }
+            if (key === 'v') {
+                changeMode('void');
+            }
+            if (key === 'e') {
+                explode();
+            }
+        }
+    </script>
+</body>
+</html>

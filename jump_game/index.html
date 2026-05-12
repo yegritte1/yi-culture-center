@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彝族跳跃小游戏</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- 开始界面 -->
+        <div id="startScreen" class="screen">
+            <div class="title">
+                <h1>🏔️ 彝族跳跃</h1>
+                <p class="subtitle">奔跑在大凉山的勇士</p>
+            </div>
+            
+            <!-- 角色选择 -->
+            <div class="character-select">
+                <p class="select-title">选择角色</p>
+                <div class="character-options">
+                    <div class="character-option selected" data-gender="male">
+                        <div class="character-preview male-preview">👨</div>
+                        <span>勇士</span>
+                    </div>
+                    <div class="character-option" data-gender="female">
+                        <div class="character-preview female-preview">👩</div>
+                        <span>姑娘</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <p>按 <span class="key">空格</span> 或 <span class="key">点击屏幕</span> 跳跃</p>
+                <p>躲避山峦、索玛花、老虎、飞鸟和火把！</p>
+            </div>
+            <button id="startBtn" class="btn btn-primary">开始游戏</button>
+        </div>
+        
+        <!-- 游戏结束界面 -->
+        <div id="gameOverScreen" class="screen hidden">
+            <div class="title">
+                <h2>游戏结束</h2>
+            </div>
+            <div class="score-display">
+                <p>本次得分: <span id="currentScore">0</span></p>
+                <p>最高得分: <span id="highScore">0</span></p>
+            </div>
+            <div class="button-group">
+                <button id="restartBtn" class="btn btn-primary">再来一次</button>
+                <button id="homeBtn" class="btn btn-secondary">返回主页</button>
+            </div>
+        </div>
+        
+        <!-- 分数显示 -->
+        <div id="scoreBoard" class="score-board hidden">
+            <span id="score">0</span>
+        </div>
+        
+        <!-- 时间显示 -->
+        <div id="timeDisplay" class="time-display hidden">
+            <span id="timeIcon">☀️</span>
+            <span id="timeText">正午</span>
+        </div>
+        
+        <!-- 暂停按钮 -->
+        <button id="pauseBtn" class="pause-btn hidden">⏸️</button>
+    </div>
+    
+    <script src="js/utils.js"></script>
+    <script src="js/background.js"></script>
+    <script src="js/obstacle.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

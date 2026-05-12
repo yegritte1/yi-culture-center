@@ -1,0 +1,11 @@
+# Ignore system files
+Thumbs.db
+.DS_Store
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Node (if needed)
+node_modules/

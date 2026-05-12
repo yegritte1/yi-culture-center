@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彝族纹样数字画廊 | Yi Ethnic Pattern Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yi-red: #B51111;
+            --yi-yellow: #F5D547;
+            --yi-black: #121212;
+            --yi-gold: #D4AF37;
+            --yi-dark-red: #8B0000;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--yi-black);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .yi-pattern-bg {
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(181, 17, 17, 0.05) 10px, rgba(181, 17, 17, 0.05) 20px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(245, 213, 71, 0.03) 10px, rgba(245, 213, 71, 0.03) 20px);
+            min-height: 100vh;
+        }
+
+        /* 背景装饰 */
+        .bg-decoration {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.08;
+        }
+
+        .bg-circle-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--yi-red), transparent);
+            top: 10%;
+            left: 10%;
+            animation: float1 20s ease-in-out infinite;
+        }
+
+        .bg-circle-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--yi-yellow), transparent);
+            bottom: 20%;
+            right: 10%;
+            animation: float2 25s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(50px, 30px) scale(1.1); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, -50px) scale(1.15); }
+        }
+
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: linear-gradient(to bottom, rgba(18, 18, 18, 0.95), transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-red), var(--yi-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .lang-btn:hover,
+        .lang-btn.active {
+            background: var(--yi-yellow);
+            color: var(--yi-black);
+            border-color: var(--yi-yellow);
+        }
+
+        .back-btn {
+            background: rgba(181, 17, 17, 0.3);
+            border: 1px solid var(--yi-yellow);
+            color: var(--yi-yellow);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--yi-yellow);
+            color: var(--yi-black);
+        }
+
+        /* Hero 区域 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--yi-yellow) 0%, var(--yi-red) 50%, var(--yi-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            white-space: nowrap;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-intro {
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 搜索框 */
+        .search-box {
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 50px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--yi-yellow);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 颜色筛选 */
+        .color-filter {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .color-btn:hover,
+        .color-btn.active {
+            transform: scale(1.2);
+            border-color: white;
+        }
+
+        /* 分类展示 */
+        .category-section {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .category-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-title span {
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .category-line {
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, var(--yi-red), var(--yi-yellow), transparent);
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .pattern-card {
+            background: linear-gradient(135deg, rgba(181, 17, 17, 0.1), rgba(139, 0, 0, 0.05));
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .pattern-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 20px 40px rgba(181, 17, 17, 0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .pattern-card:hover .card-image img {
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-category {
+            font-size: 0.75rem;
+            color: var(--yi-yellow);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+
+        .card-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .card-desc {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 详情弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a, #2d1810);
+            border: 2px solid var(--yi-gold);
+            border-radius: 24px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(181, 17, 17, 0.5);
+            border: 1px solid var(--yi-yellow);
+            color: var(--yi-yellow);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            background: var(--yi-yellow);
+            color: var(--yi-black);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-category {
+            color: var(--yi-yellow);
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-aliases {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: var(--yi-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+        }
+
+        /* 页脚 */
+        .footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-right {
+                gap: 0.5rem;
+            }
+
+            .lang-btn {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.7rem;
+            }
+
+            .hero {
+                padding: 6rem 1rem 3rem;
+            }
+
+            .hero-title {
+                font-size: clamp(2rem, 8vw, 3rem);
+                white-space: normal;
+            }
+
+            .category-section {
+                padding: 1rem;
+            }
+
+            .pattern-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .modal.show {
+                padding: 1rem;
+            }
+        }
+
+        /* 无结果提示 */
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="yi-pattern-bg">
+        <!-- 背景装饰 -->
+        <div class="bg-decoration">
+            <div class="bg-circle bg-circle-1"></div>
+            <div class="bg-circle bg-circle-2"></div>
+        </div>
+
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="logo" id="navTitle">彝族纹样数字画廊</div>
+                <div class="nav-right">
+                    <div class="lang-switch">
+                        <button class="lang-btn active" data-lang="zh">中文</button>
+                        <button class="lang-btn" data-lang="en">EN</button>
+                        <button class="lang-btn" data-lang="jp">日本語</button>
+                    </div>
+                    <a href="../index.html" class="back-btn" id="backBtn">← 返回</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero 区域 -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title" id="heroTitle">彝族纹样数字画廊</h1>
+                <p class="hero-subtitle" id="heroSubtitle">探索千年传承的民族艺术之美</p>
+                <p class="hero-intro" id="heroIntro">
+                    彝族纹样是彝族文化的瑰宝，每一个图案都承载着深厚的文化内涵和民族精神。从天地气象到飞禽走兽，从花草树木到日常器物，这些纹样记录了彝族人民与自然和谐共生的智慧。
+                </p>
+
+                <!-- 搜索框 -->
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索纹样名称或文化内涵...">
+                </div>
+
+                <!-- 颜色筛选 -->
+                <div class="color-filter" id="colorFilter">
+                    <button class="color-btn active" data-color="" style="background: linear-gradient(135deg, #B51111, #F5D547, #121212);" title="全部"></button>
+                    <button class="color-btn" data-color="#B51111" style="background: #B51111;" title="红色"></button>
+                    <button class="color-btn" data-color="#F5D547" style="background: #F5D547;" title="黄色"></button>
+                    <button class="color-btn" data-color="#D4AF37" style="background: #D4AF37;" title="金色"></button>
+                    <button class="color-btn" data-color="#121212" style="background: #121212; border: 1px solid #333;" title="黑色"></button>
+                    <button class="color-btn" data-color="#8B7355" style="background: #8B7355;" title="棕色"></button>
+                    <button class="color-btn" data-color="#50C878" style="background: #50C878;" title="绿色"></button>
+                    <button class="color-btn" data-color="#4A90E2" style="background: #4A90E2;" title="蓝色"></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 纹样画廊 -->
+        <section class="gallery" id="gallery">
+            <div id="patternContainer"></div>
+        </section>
+
+        <!-- 详情弹窗 -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal()">×</button>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p class="footer-text" id="footerText">
+                Made with ❤️ for Yi Culture Heritage | 传承彝族文化
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // 多语言翻译数据
+        const translations = {
+            zh: {
+                nav: { home: '彝族纹样数字画廊', back: '← 返回' },
+                home: { title: '彝族纹样数字画廊', subtitle: '探索千年传承的民族艺术之美', intro: '彝族纹样是彝族文化的瑰宝，每一个图案都承载着深厚的文化内涵和民族精神。从天地气象到飞禽走兽，从花草树木到日常器物，这些纹样记录了彝族人民与自然和谐共生的智慧。', searchPlaceholder: '搜索纹样名称或文化内涵...' },
+                categories: { celestial: '天地气象系', animal: '动物系', plant: '植物系', artifact: '器物系' },
+                detail: { back: '返回', aliases: '别名', origin: '溯源与历史', visuals: '视觉构成', meaning: '文化内涵', usage: '应用与传承' },
+                footer: { copyright: '传承彝族文化' },
+                noResults: '未找到相关纹样'
+            },
+            en: {
+                nav: { home: 'Yi Pattern Gallery', back: '← Back' },
+                home: { title: 'Yi Ethnic Pattern Gallery', subtitle: 'Explore the Beauty of Millennial Cultural Heritage', intro: 'Yi ethnic patterns are treasures of Yi culture. Each design carries profound cultural connotations and national spirit.', searchPlaceholder: 'Search pattern name or cultural meaning...' },
+                categories: { celestial: 'Celestial & Natural', animal: 'Animal Patterns', plant: 'Plant Patterns', artifact: 'Artifact Patterns' },
+                detail: { back: 'Back', aliases: 'Aliases', origin: 'Origin & History', visuals: 'Visual Composition', meaning: 'Cultural Meaning', usage: 'Usage & Heritage' },
+                footer: { copyright: 'Yi Culture Heritage' },
+                noResults: 'No patterns found'
+            },
+            jp: {
+                nav: { home: 'イ族文様ギャラリー', back: '← 戻る' },
+                home: { title: 'イ族文様デジタルギャラリー', subtitle: '千年の伝統芸術の美を探る', intro: 'イ族の文様はイ族文化の宝物です。各デザインには深い文化的意味と民族精神が込められています。', searchPlaceholder: '文様名または文化的意味を検索...' },
+                categories: { celestial: '天地気象系', animal: '動物文様', plant: '植物文様', artifact: '器物文様' },
+                detail: { back: '戻る', aliases: '別名', origin: '起源と歴史', visuals: '視覚構成', meaning: '文化的意味', usage: '用途と継承' },
+                footer: { copyright: 'イ族文化継承' },
+                noResults: '関連する文様は見つかりませんでした'
+            }
+        };
+
+        // 纹样数据（包含多语言）
+        const patternsData = [
+            { id: 'sun-moon', name: { zh: '日月纹', en: 'Sun and Moon', jp: '日月紋' }, category: 'celestial', image: './patterns/sun-moon.jpg', colors: ['#B51111', '#F5D547', '#121212'],
+              aliases: { zh: '日月同辉纹', en: 'Sun and Moon Pattern', jp: '日月同輝紋' },
+              origin: { zh: '源自彝族原始的日月星辰崇拜，是彝族先民对天地自然的敬畏与解读。', en: 'Originates from Yi people\'s worship of celestial bodies, representing their reverence for nature.', jp: 'イ族の原始的な日月星辰崇拝に由来し、自然への畏敬を表す。' },
+              visuals: { zh: '日月交辉的图案形态，通常采用对称构图，日月图腾化表达。', en: 'Symmetrical composition showing sun and moon in totem form.', jp: '日月が交互に輝く図案形態、対称構図を採用。' },
+              meaning: { zh: '象征天地相合、阴阳平衡，是万物生长的根源。', en: 'Symbolizes the union of heaven and earth, balance of yin and yang.', jp: '天地の融合、陰陽のバランスを象徴。' },
+              usage: { zh: '常用于节庆盛装、重要祭祀服饰。', en: 'Used in festival costumes and ceremonial attire.', jp: '祭りや儀式の衣装に使用される。' } },
+            { id: 'flame', name: { zh: '火焰纹', en: 'Flame Pattern', jp: '火焰紋' }, category: 'celestial', image: './patterns/flame.jpg', colors: ['#B51111', '#F5D547', '#FF6B35'],
+              aliases: { zh: '火纹', en: 'Fire Pattern', jp: '火紋' },
+              origin: { zh: '彝族自称"火的民族"，火是生命、温暖与文明的象征。', en: 'Yi people call themselves "the fire nation", fire symbolizes life and warmth.', jp: 'イ族は「火の民族」と自称、火は生命と温かさの象徴。' },
+              visuals: { zh: '跃动的火焰形态，通常以红、黄、橙色为主。', en: 'Dynamic flame shape in red, yellow and orange.', jp: '躍動的な炎の形態、赤・黄・オレンジ为主。' },
+              meaning: { zh: '代表光明与希望，象征生命与繁衍。', en: 'Represents light and hope, symbolizing life and reproduction.', jp: '光明と希望、生命と繁殖を象徴。' },
+              usage: { zh: '广泛应用于日常服饰、节庆装束。', en: 'Widely used in daily and festival clothing.', jp: '日常生活と祭りの衣装に広く使用。' } },
+            { id: 'sun', name: { zh: '太阳纹', en: 'Sun Pattern', jp: '太陽紋' }, category: 'celestial', image: './patterns/sun.jpg', colors: ['#F5D547', '#FF6B35', '#B51111'],
+              aliases: { zh: '太阳图腾纹', en: 'Sun Totem Pattern', jp: '太陽図騰紋' },
+              origin: { zh: '彝族是"崇拜太阳的民族"，太阳是先民对太阳的图腾化表达。', en: 'Yi people worship the sun as a totem of their ancestors.', jp: 'イ族は「太陽を崇拝する民族」、祖先の太陽崇拝の表現。' },
+              visuals: { zh: '以圆形为中心，四周放射光芒，常见八角或十二角太阳纹。', en: 'Circular center with radiating rays, often 8 or 12 points.', jp: '円形为中心、四方に光芒を放つ。' },
+              meaning: { zh: '象征驱散黑暗、温暖万物，是对美好生活的永恒向往。', en: 'Symbolizes dispelling darkness and warming all things.', jp: '暗黒を払い、すべてのものを温めることを象徴。' },
+              usage: { zh: '常绣于衣领、胸前等显著位置。', en: 'Often embroidered on collar and chest.', jp: '襟や胸元など目立つ位置に刺繍。' } },
+            { id: 'wave', name: { zh: '波浪纹', en: 'Wave Pattern', jp: '波浪紋' }, category: 'celestial', image: './patterns/wave.jpg', colors: ['#4A90E2', '#5AB9EA', '#121212'],
+              aliases: { zh: '水波纹', en: 'Water Wave Pattern', jp: '水波紋' },
+              origin: { zh: '彝族先民多依水而居，水是生命、繁衍与文明的根基。', en: 'Yi ancestors lived near water, which is the foundation of life.', jp: 'イ族の祖先は水のそばに 거주、水は生命の根源。' },
+              visuals: { zh: '连续的波浪形曲线，起伏有致，模拟水流动态。', en: 'Continuous wavy curves simulating water flow.', jp: '連続する波形の曲線、水の流れを表現。' },
+              meaning: { zh: '水孕育万物，象征水源充沛、五谷丰登。', en: 'Water nourishes all things, symbolizing abundance.', jp: '水は全てを育み、豊穣を象徴。' },
+              usage: { zh: '常用于衣袖、裙摆等流动部位。', en: 'Used on sleeves and hemlines.', jp: '袖や裙など動きのある部位に使用。' } },
+            { id: 'ram-horn', name: { zh: '羊角纹', en: 'Ram Horn Pattern', jp: '羊角紋' }, category: 'animal', image: './patterns/ram-horn.jpg', colors: ['#8B7355', '#D4AF37', '#121212'],
+              aliases: { zh: '羊图腾纹', en: 'Sheep Totem Pattern', jp: '羊図騰紋' },
+              origin: { zh: '羊是彝族畜牧业的重要财富，羊图腾崇拜源远流长。', en: 'Sheep are important livestock for Yi people with long totem history.', jp: '羊はイ族にとって重要な家畜、圖騰崇拝の歴史が長い。' },
+              visuals: { zh: '弯曲的羊角形态，通常呈对称的螺旋状或弧形。', en: 'Curved ram horn in symmetrical spiral or arc shape.', jp: '弯曲した羊角の形態、対称の螺旋状。' },
+              meaning: { zh: '象征畜牧丰收、衣食无忧。', en: 'Symbolizes abundant livestock and comfortable life.', jp: '畜産豊穣を象徴。' },
+              usage: { zh: '常绣于日常服饰。', en: 'Commonly used in daily clothing.', jp: '日常の衣類に刺繍。' } },
+            { id: 'tiger', name: { zh: '虎纹', en: 'Tiger Pattern', jp: '虎紋' }, category: 'animal', image: './patterns/tiger.jpg', colors: ['#FF6B35', '#121212', '#8B7355'],
+              aliases: { zh: '彝族虎图腾纹', en: 'Yi Tiger Totem', jp: 'イ族虎図騰紋' },
+              origin: { zh: '彝族创世神话中，虎是开天辟地的始祖。', en: 'In Yi mythology, the tiger created the world.', jp: 'イ族の神話では，虎は天地を開いた祖先。' },
+              visuals: { zh: '虎的形象或虎纹肌理，线条刚劲有力。', en: 'Tiger image or stripes with powerful lines.', jp: '虎の形象或は虎の筋紋、力強いライン。' },
+              meaning: { zh: '虎是族群始祖与守护神，象征力量与威严。', en: 'Tiger is the ancestor and guardian, symbolizing power.', jp: '虎は祖先の守護神、力と威厳を象徴。' },
+              usage: { zh: '多用于男性服饰、武士装束。', en: 'Used in men\'s clothing and warrior attire.', jp: '男性の衣類や武者の装束に使用。' } },
+            { id: 'ox-horn', name: { zh: '牛角纹', en: 'Ox Horn Pattern', jp: '牛角紋' }, category: 'animal', image: './patterns/ox-horn.jpg', colors: ['#8B7355', '#B51111', '#121212'],
+              aliases: { zh: '牛图腾纹', en: 'Ox Totem Pattern', jp: '牛図騰紋' },
+              origin: { zh: '牛是彝族耕地、驮运的主力，牛图腾崇拜深入人心。', en: 'Ox is the main farm animal for Yi people.', jp: '牛はイ族の耕作・輸送の主力。' },
+              visuals: { zh: '弯曲有力的牛角形态，通常呈对称的弧形。', en: 'Powerful curved ox horn in symmetrical arc.', jp: '力強い牛角の形態、対称の弧形。' },
+              meaning: { zh: '象征风调雨顺、五谷丰登。', en: 'Symbolizes good weather and abundant harvest.', jp: '豊作を象徴。' },
+              usage: { zh: '常用于农耕相关的服饰和祭祀用品。', en: 'Used in farming-related clothing and rituals.', jp: '農耕関連の衣類や祭祀品に使用。' } },
+            { id: 'ox-eye', name: { zh: '牛眼纹', en: 'Ox Eye Pattern', jp: '牛眼紋' }, category: 'animal', image: './patterns/ox-eye.jpg', colors: ['#8B7355', '#F5D547', '#121212'],
+              aliases: { zh: '牛目纹', en: 'Ox Eye Symbol', jp: '牛目紋' },
+              origin: { zh: '牛眼被视为"忠诚之眼"，是牛图腾崇拜的延伸。', en: 'Ox eye represents loyalty in Yi culture.', jp: '牛目は「忠誠の目」として崇拝される。' },
+              visuals: { zh: '圆形或椭圆形的眼睛形态，中心有瞳孔。', en: 'Round or oval eye shape with pupil.', jp: '円形または楕円形の目、中心に瞳。' },
+              meaning: { zh: '寓意守护与洞察，是"镇宅护家"的吉祥符号。', en: 'Represents guardianship and insight.', jp: '守護と洞察を寓意、吉兆の象徴。' },
+              usage: { zh: '常绣于儿童服饰。', en: 'Often used in children\'s clothing.', jp: '子供の衣類に刺繍。' } },
+            { id: 'crab-claw', name: { zh: '蟹足纹', en: 'Crab Claw Pattern', jp: '蟹足紋' }, category: 'animal', image: './patterns/crab-claw.jpg', colors: ['#B51111', '#4A90E2', '#121212'],
+              aliases: { zh: '蟹爪纹', en: 'Crab Claw Symbol', jp: '蟹爪紋' },
+              origin: { zh: '蟹生于水泽，是水崇拜与自然共生的精神表达。', en: 'Crab represents water worship and harmony with nature.', jp: '蟹は水への崇拝と自然との共生を表現。' },
+              visuals: { zh: '多足的蟹形图案，线条对称。', en: 'Multi-legged crab shape with symmetrical lines.', jp: '多足の蟹形圖案、対称のライン。' },
+              meaning: { zh: '象征族群人丁兴旺、生生不息。', en: 'Symbolizes prosperous descendants.', jp: '子孫繁栄を象徴。' },
+              usage: { zh: '常与波浪纹组合使用。', en: 'Often combined with wave patterns.', jp: '波紋と組合せて使用。' } },
+            { id: 'camellia', name: { zh: '山茶花纹', en: 'Camellia Pattern', jp: '山茶花紋' }, category: 'plant', image: './patterns/camellia.jpg', colors: ['#E8175D', '#50C878', '#121212'],
+              aliases: { zh: '茶花纹', en: 'Tea Flower Pattern', jp: '茶花紋' },
+              origin: { zh: '山茶是彝区原生名花，寒冬绽放、花期长。', en: 'Camellia is native to Yi region, blooming in winter.', jp: '山茶はイ族地域の特産花、冬季に開花。' },
+              visuals: { zh: '饱满的山茶花形态，花瓣层叠。', en: 'Full camellia with layered petals.', jp: '可愛い山茶花の形態、花弁が重なる。' },
+              meaning: { zh: '象征坚韧不拔、顽强生存的精神。', en: 'Symbolizes resilience and perseverance.', jp: '坚韧不抜、懸命に生きる精神を象徴。' },
+              usage: { zh: '常用于女性服饰。', en: 'Commonly used in women\'s clothing.', jp: '女性の衣類に使用。' } },
+            { id: 'azalea-red', name: { zh: '马缨花纹', en: 'Red Azalea Pattern', jp: '馬纓花紋' }, category: 'plant', image: './patterns/azalea-red.jpg', colors: ['#E8175D', '#B51111', '#50C878'],
+              aliases: { zh: '马樱花纹', en: 'Azalea Pattern', jp: '桜花紋' },
+              origin: { zh: '马樱花在高山早春开放，耐寒又热烈。', en: 'Azalea blooms in early spring in mountains.', jp: '馬桜は高山に早春に咲く。' },
+              visuals: { zh: '鲜红艳丽的花朵形态。', en: 'Bright red flower shape.', jp: '鮮やかな赤い花の形態。' },
+              meaning: { zh: '象征顽强的生命力、生生不息。', en: 'Symbolizes resilient vitality.', jp: '的生命力の強さを象徴。' },
+              usage: { zh: '是火把节、婚嫁服饰的主纹。', en: 'Main pattern for Torch Festival and wedding.', jp: '火把節・結婚式の主要な紋様。' } },
+            { id: 'azalea', name: { zh: '索玛花纹', en: 'Azalea Pattern', jp: 'ソマ花紋' }, category: 'plant', image: './patterns/azalea.jpg', colors: ['#DA70D6', '#E8175D', '#50C878'],
+              aliases: { zh: '杜鹃花纹', en: 'Rhododendron Pattern', jp: '杜鹃花紋' },
+              origin: { zh: '索玛花即彝族对高山杜鹃的统称。', en: 'Soma is Yi name for mountain rhododendron.', jp: 'ソマ花は高山杜鹃のイ族名。' },
+              visuals: { zh: '团簇的花朵形态，色彩丰富。', en: 'Clustered flowers in various colors.', jp: '集団の花朵、色彩豊か。' },
+              meaning: { zh: '象征"不畏艰难、向阳而生"的生命力量。', en: 'Symbolizes life force facing challenges.', jp: '困難に恐れず、陽に 向かう生命力を象徴。' },
+              usage: { zh: '常用于节庆服饰。', en: 'Used in festival clothing.', jp: '祭りの衣類に使用。' } },
+            { id: 'fruit-tree', name: { zh: '果树纹', en: 'Fruit Tree Pattern', jp: '果樹紋' }, category: 'plant', image: './patterns/fruit-tree.jpg', colors: ['#50C878', '#8B7355', '#E8175D'],
+              aliases: { zh: '果木纹', en: 'Fruit Tree Symbol', jp: '果木紋' },
+              origin: { zh: '彝族自古靠山吃山，果树是山林收获的象征。', en: 'Fruit trees represent mountain harvest for Yi.', jp: '果樹は山林の収穫を象徴。' },
+              visuals: { zh: '树木形态，枝繁叶茂，果实累累。', en: 'Tree with abundant leaves and fruits.', jp: '木、花・葉が茂り、果实が実る。' },
+              meaning: { zh: '象征粮食满仓、物产丰饶。', en: 'Symbolizes abundant harvest.', jp: '豊穣を象徴。' },
+              usage: { zh: '常绣在儿童服饰与家居绣品上。', en: 'Used in children\'s clothing and home textiles.', jp: '子供の衣類や家居の刺繍に使用。' } },
+            { id: 'fern', name: { zh: '蕨芨纹', en: 'Fern Pattern', jp: 'シダ紋' }, category: 'plant', image: './patterns/fern.jpg', colors: ['#50C878', '#8B7355', '#121212'],
+              aliases: { zh: '蕨菜纹', en: 'Fern Leaf Pattern', jp: '蕨菜紋' },
+              origin: { zh: '蕨根含淀粉，先民靠蕨粉充饥度荒。', en: 'Fern roots provided starch for ancestors.', jp: '蕨の根にはデンプンが含まれ、重要な食料。' },
+              visuals: { zh: '蕨类植物的卷曲芽状形态。', en: 'Curly fern sprout shape.', jp: '蕨類植物の巻き芽の形態。' },
+              meaning: { zh: '象征坚韧不拔、逆境求生的民族精神。', en: 'Symbolizes resilience in adversity.', jp: '逆境に生きる坚韧さを象徴。' },
+              usage: { zh: '常用于日常服饰。', en: 'Used in daily clothing.', jp: '日常の衣類に使用。' } },
+            { id: 'fire-steel', name: { zh: '火镰纹', en: 'Fire Steel Pattern', jp: '火打ち石紋' }, category: 'artifact', image: './patterns/fire-steel.jpg', colors: ['#8B7355', '#B51111', '#D4AF37'],
+              aliases: { zh: '火镰取火纹', en: 'Fire Striker Pattern', jp: '火起こし紋' },
+              origin: { zh: '火镰是火种之源、文明之始。', en: 'Fire steel is the source of fire and civilization.', jp: '火打ち石は火の源、文明の始まり。' },
+              visuals: { zh: '火镰工具的形态，通常呈弧形或钩状。', en: 'Curved or hook-shaped fire steel tool.', jp: '弧形や钩状の形態。' },
+              meaning: { zh: '象征火神庇佑、火种永续。', en: 'Symbolizes fire god\'s blessing and eternal flame.', jp: '火神の加護、火種永続を象徴。' },
+              usage: { zh: '常用于火把节服饰。', en: 'Used in Torch Festival clothing.', jp: '火把節の衣類に使用。' } },
+            { id: 'hearth', name: { zh: '锅庄纹', en: 'Hearth Pattern', jp: '炉紋' }, category: 'artifact', image: './patterns/hearth.jpg', colors: ['#B51111', '#8B7355', '#121212'],
+              aliases: { zh: '火塘纹', en: 'Fire Pit Pattern', jp: '火塘紋' },
+              origin: { zh: '源于彝族火塘三锅庄石，是家的中心。', en: 'Originates from the three hearth stones, center of home.', jp: 'イ族の三つの炉石に由来、家の中核。' },
+              visuals: { zh: '环形或放射状的三角石形态。', en: 'Ring or radial triangular stone pattern.', jp: '放射状の三角石の形態。' },
+              meaning: { zh: '代表温暖、团圆、生命延续。', en: 'Represents warmth, reunion, life continuation.', jp: '温かさ、団結、生命の継続を象徴。' },
+              usage: { zh: '常用于家居织品和重要礼仪服饰。', en: 'Used in home textiles and ceremonial clothing.', jp: '家居の織物や儀礼の衣類に使用。' } },
+            { id: 'window', name: { zh: '窗格纹', en: 'Window Lattice Pattern', jp: '窓格子紋' }, category: 'artifact', image: './patterns/window.jpg', colors: ['#8B7355', '#121212', '#D4AF37'],
+              aliases: { zh: '木格纹', en: 'Wood Lattice Pattern', jp: '木格紋' },
+              origin: { zh: '窗格是彝族传统民居的核心构件。', en: 'Window lattice is key part of traditional Yi houses.', jp: '窓格子はイ族伝統住居の核心部件。' },
+              visuals: { zh: '规整的网格结构，以直线、直角、对称为核心。', en: 'Regular grid with straight lines and right angles.', jp: '整然としたグリッド構造。' },
+              meaning: { zh: '象征家宅稳固、安居乐业。', en: 'Symbolizes stable home and peaceful life.', jp: '家の安定、穏やかな生活を象徴。' },
+              usage: { zh: '常用于日常服饰边缘装饰。', en: 'Used as edge decoration in daily clothing.', jp: '日常の衣類の縁飾りとして使用。' } }
+        ];
+
+        // 当前状态
+        let currentLang = 'zh';
+        let currentCategory = 'all';
+        let currentColor = '';
+        let searchQuery = '';
+
+        // 翻译函数
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // 获取纹样名称
+        function getPatternName(pattern) {
+            return pattern.name[currentLang] || pattern.name.zh;
+        }
+
+        // 获取分类名称
+        function getCategoryName(category) {
+            return translations[currentLang].categories[category] || category;
+        }
+
+        // 更新界面文本
+        function updateUI() {
+            document.getElementById('navTitle').textContent = translations[currentLang].nav.home;
+            document.getElementById('heroTitle').textContent = translations[currentLang].home.title;
+            document.getElementById('heroSubtitle').textContent = translations[currentLang].home.subtitle;
+            document.getElementById('heroIntro').textContent = translations[currentLang].home.intro;
+            document.getElementById('searchInput').placeholder = translations[currentLang].home.searchPlaceholder;
+            document.getElementById('backBtn').textContent = translations[currentLang].nav.back;
+            document.getElementById('footerText').textContent = 'Made with ❤️ for Yi Culture Heritage | ' + translations[currentLang].footer.copyright;
+
+            // 更新语言按钮
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === currentLang);
+            });
+
+            renderPatterns();
+        }
+
+        // 过滤纹样
+        function getFilteredPatterns() {
+            return patternsData.filter(p => {
+                // 分类过滤
+                if (currentCategory !== 'all' && p.category !== currentCategory) return false;
+
+                // 颜色过滤
+                if (currentColor && !p.colors.includes(currentColor)) return false;
+
+                // 搜索过滤
+                if (searchQuery) {
+                    const query = searchQuery.toLowerCase();
+                    const name = getPatternName(p).toLowerCase();
+                    const meaning = (p.meaning[currentLang] || p.meaning.zh).toLowerCase();
+                    if (!name.includes(query) && !meaning.includes(query)) return false;
+                }
+
+                return true;
+            });
+        }
+
+        // 渲染纹样卡片
+        function renderPatterns() {
+            const container = document.getElementById('patternContainer');
+            const filtered = getFilteredPatterns();
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <h3>${translations[currentLang].noResults}</h3>
+                    </div>
+                `;
+                return;
+            }
+
+            // 按分类分组
+            const categories = ['celestial', 'animal', 'plant', 'artifact'];
+            let html = '';
+
+            categories.forEach(cat => {
+                const catPatterns = filtered.filter(p => p.category === cat);
+                if (catPatterns.length === 0) return;
+
+                html += `
+                    <div class="category-section">
+                        <h2 class="category-title">
+                            <span>${getCategoryName(cat)}</span>
+                            <div class="category-line"></div>
+                        </h2>
+                        <div class="pattern-grid">
+                            ${catPatterns.map(p => `
+                                <div class="pattern-card" onclick="openModal('${p.id}')">
+                                    <div class="card-image">
+                                        <img src="${p.image}" alt="${getPatternName(p)}" loading="lazy">
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-category">${getCategoryName(p.category)}</div>
+                                        <h3 class="card-title">${getPatternName(p)}</h3>
+                                        <p class="card-desc">${p.meaning[currentLang] || p.meaning.zh}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 打开详情弹窗
+        function openModal(id) {
+            const pattern = patternsData.find(p => p.id === id);
+            if (!pattern) return;
+
+            const modalBody = document.getElementById('modalBody');
+            const d = translations[currentLang].detail;
+
+            modalBody.innerHTML = `
+                <div class="modal-image">
+                    <img src="${pattern.image}" alt="${getPatternName(pattern)}">
+                </div>
+                <div class="modal-category">${getCategoryName(pattern.category)}</div>
+                <h2 class="modal-title">${getPatternName(pattern)}</h2>
+                <p class="modal-aliases">${d.aliases}: ${pattern.aliases[currentLang] || pattern.aliases.zh}</p>
+
+                <div class="info-section">
+                    <div class="info-title">${d.origin}</div>
+                    <div class="info-text">${pattern.origin[currentLang] || pattern.origin.zh}</div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">${d.visuals}</div>
+                    <div class="info-text">${pattern.visuals[currentLang] || pattern.visuals.zh}</div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">${d.meaning}</div>
+                    <div class="info-text">${pattern.meaning[currentLang] || pattern.meaning.zh}</div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-title">${d.usage}</div>
+                    <div class="info-text">${pattern.usage[currentLang] || pattern.usage.zh}</div>
+                </div>
+            `;
+
+            document.getElementById('modal').classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // 事件监听
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentLang = btn.dataset.lang;
+                updateUI();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderPatterns();
+        });
+
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentColor = btn.dataset.color;
+                renderPatterns();
+            });
+        });
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // 初始化
+        updateUI();
+    </script>
+</body>
+</html>
