@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翻译手册 | 彝族纹样</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yi-red: #B51111;
+            --yi-yellow: #F5D547;
+            --yi-black: #121212;
+            --yi-gold: #D4AF37;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--yi-black);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .translation-bg {
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(181, 17, 17, 0.05) 10px, rgba(181, 17, 17, 0.05) 20px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(245, 213, 71, 0.03) 10px, rgba(245, 213, 71, 0.03) 20px);
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: linear-gradient(to bottom, rgba(18, 18, 18, 0.95), transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-content {
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-red), var(--yi-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .back-btn {
+            background: rgba(181, 17, 17, 0.3);
+            border: 1px solid var(--yi-yellow);
+            color: var(--yi-yellow);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--yi-yellow);
+            color: var(--yi-black);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 40vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8rem 2rem 3rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--yi-yellow) 0%, var(--yi-red) 50%, var(--yi-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 600px;
+        }
+
+        /* 图片展示 - 全屏有缝隙 */
+        .gallery-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .translation-image {
+            width: 100%;
+            display: block;
+            margin-bottom: 8px;
+            border-radius: 8px;
+        }
+
+        .translation-image:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 页脚 */
+        .footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .hero {
+                padding: 6rem 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="translation-bg">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <a href="../index.html" class="logo">彝族文化数字体验中心</a>
+                <a href="../index.html" class="back-btn">← 返回首页</a>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero">
+            <h1 class="hero-title">翻译手册</h1>
+            <p class="hero-subtitle">彝族纹样术语中英日对照</p>
+        </section>
+
+        <!-- 图片展示 -->
+        <div class="gallery-container">
+            <img src="page1.png" alt="翻译手册 第1页" class="translation-image">
+            <img src="page2.png" alt="翻译手册 第2页" class="translation-image">
+            <img src="page3.png" alt="翻译手册 第3页" class="translation-image">
+            <img src="page4.png" alt="翻译手册 第4页" class="translation-image">
+            <img src="page5.png" alt="翻译手册 第5页" class="translation-image">
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p class="footer-text">Made with ❤️ for Yi Culture Heritage | 传承彝族文化</p>
+        </footer>
+    </div>
+</body>
+</html>
