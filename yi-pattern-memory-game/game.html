@@ -465,15 +465,15 @@
     </div>
 
     <script>
-        const images = [
-            'images/sun.jpg',
-            'images/flame.jpg',
-            'images/tiger.jpg',
-            'images/ox-horn.jpg',
-            'images/azalea.jpg',
-            'images/fern.jpg',
-            'images/window.jpg',
-            'images/fire-steel.jpg'
+        const patterns = [
+            { image: 'images/ox-horn.png', name: '牛角纹 | Ox-Horn Motif' },
+            { image: 'images/maying-flower.png', name: '马樱花纹 | Maying Flower Motif' },
+            { image: 'images/tiger.png', name: '老虎纹 | Tiger Motif' },
+            { image: 'images/ram-horn.png', name: '羊角纹 | Ram-Horn Motif' },
+            { image: 'images/soma-flower.png', name: '索玛花纹 | Soma Flower Motif' },
+            { image: 'images/fern-sprout.png', name: '蕨菜纹 | Fern-Sprout Motif' },
+            { image: 'images/fire-striker.png', name: '火镰纹 | Fire-Striker Motif' },
+            { image: 'images/sun-moon.png', name: '日月纹 | Sun-and-Moon Motif' }
         ];
 
         let cards = [];
@@ -486,10 +486,11 @@
 
         function init() {
             // 创建卡片对
-            const pairs = [...images, ...images];
-            cards = pairs.sort(() => Math.random() - 0.5).map((img, i) => ({
+            const pairs = [...patterns, ...patterns];
+            cards = pairs.sort(() => Math.random() - 0.5).map((pattern, i) => ({
                 id: i,
-                image: img,
+                image: pattern.image,
+                name: pattern.name,
                 flipped: false,
                 matched: false
             }));
@@ -527,7 +528,7 @@
                         <div class="card-back-content">彝</div>
                     </div>
                     <div class="card-face card-front">
-                        <img src="${card.image}" alt="纹样">
+                        <img src="${card.image}" alt="${card.name}">
                     </div>
                 `;
 
@@ -574,7 +575,7 @@
                         canFlip = true;
 
                         // 检查胜利
-                        if (matched === 8) {
+                        if (matched === patterns.length) {
                             clearInterval(timer);
                             setTimeout(showWin, 500);
                         }
@@ -598,7 +599,7 @@
             const m = Math.floor(seconds / 60);
             const s = seconds % 60;
             document.getElementById('time').textContent = `${m}:${s.toString().padStart(2, '0')}`;
-            document.getElementById('pairs').textContent = `${matched}/8`;
+            document.getElementById('pairs').textContent = `${matched}/${patterns.length}`;
         }
 
         function showWin() {
