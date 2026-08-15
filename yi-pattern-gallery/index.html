@@ -564,6 +564,9 @@
                         <button class="lang-btn active" data-lang="zh">中文</button>
                         <button class="lang-btn" data-lang="en">EN</button>
                         <button class="lang-btn" data-lang="jp">日本語</button>
+                        <button class="lang-btn" data-lang="fr">FR</button>
+                        <button class="lang-btn" data-lang="de">DE</button>
+                        <button class="lang-btn" data-lang="es">ES</button>
                     </div>
                     <a href="../index.html" class="back-btn" id="backBtn">← 返回</a>
                 </div>
@@ -646,6 +649,30 @@
                 detail: { back: '戻る', aliases: '別名', origin: '起源と歴史', visuals: '視覚構成', meaning: '文化的意味', usage: '用途と継承' },
                 footer: { copyright: 'イ族文化継承' },
                 noResults: '関連する文様は見つかりませんでした'
+            },
+            fr: {
+                nav: { home: 'Galerie des motifs Yi', back: '← Retour' },
+                home: { title: 'Galerie numérique des motifs Yi', subtitle: 'Explorer la beauté d’un art transmis depuis des millénaires', intro: 'Les motifs Yi sont des trésors de la culture Yi. Chaque dessin porte une signification culturelle profonde et l’esprit du peuple Yi, depuis les phénomènes célestes jusqu’aux animaux, aux plantes et aux objets du quotidien.', searchPlaceholder: 'Rechercher un motif ou une signification culturelle...' },
+                categories: { celestial: 'Ciel et phénomènes naturels', animal: 'Motifs animaux', plant: 'Motifs végétaux', artifact: 'Motifs d’objets' },
+                detail: { back: 'Retour', aliases: 'Autres noms', origin: 'Origine et histoire', visuals: 'Composition visuelle', meaning: 'Signification culturelle', usage: 'Usage et transmission' },
+                footer: { copyright: 'Transmission de la culture Yi' },
+                noResults: 'Aucun motif trouvé'
+            },
+            de: {
+                nav: { home: 'Yi-Mustergalerie', back: '← Zurück' },
+                home: { title: 'Digitale Galerie der Yi-Muster', subtitle: 'Die Schönheit jahrtausendealter Volkskunst entdecken', intro: 'Yi-Muster sind Schätze der Yi-Kultur. Jedes Design trägt tiefe kulturelle Bedeutungen und den Geist des Yi-Volkes – von Himmelserscheinungen über Tiere und Pflanzen bis hin zu Alltagsgegenständen.', searchPlaceholder: 'Mustername oder kulturelle Bedeutung suchen...' },
+                categories: { celestial: 'Himmel und Naturphänomene', animal: 'Tiermuster', plant: 'Pflanzenmuster', artifact: 'Objektmuster' },
+                detail: { back: 'Zurück', aliases: 'Weitere Namen', origin: 'Ursprung und Geschichte', visuals: 'Visuelle Komposition', meaning: 'Kulturelle Bedeutung', usage: 'Verwendung und Weitergabe' },
+                footer: { copyright: 'Weitergabe der Yi-Kultur' },
+                noResults: 'Keine Muster gefunden'
+            },
+            es: {
+                nav: { home: 'Galería de motivos Yi', back: '← Volver' },
+                home: { title: 'Galería digital de motivos Yi', subtitle: 'Explora la belleza del arte transmitido durante milenios', intro: 'Los motivos Yi son tesoros de la cultura Yi. Cada diseño porta profundos significados culturales y el espíritu del pueblo Yi, desde los fenómenos celestes hasta animales, plantas y objetos cotidianos.', searchPlaceholder: 'Buscar nombre del motivo o significado cultural...' },
+                categories: { celestial: 'Cielo y fenómenos naturales', animal: 'Motivos animales', plant: 'Motivos vegetales', artifact: 'Motivos de objetos' },
+                detail: { back: 'Volver', aliases: 'Otros nombres', origin: 'Origen e historia', visuals: 'Composición visual', meaning: 'Significado cultural', usage: 'Uso y transmisión' },
+                footer: { copyright: 'Transmisión de la cultura Yi' },
+                noResults: 'No se encontraron motivos'
             }
         };
 
@@ -755,6 +782,94 @@
               usage: { zh: '常用于日常服饰边缘装饰。', en: 'Used as edge decoration in daily clothing.', jp: '日常の衣類の縁飾りとして使用。' } }
         ];
 
+        const patternTranslations = {
+            'sun-moon': {
+                fr: { name: 'Soleil et lune', aliases: 'Motif du soleil et de la lune rayonnants', origin: 'Issu du culte ancestral Yi du soleil, de la lune et des étoiles, il exprime le respect des anciens pour le ciel, la terre et la nature.', visuals: 'Forme où soleil et lune se répondent, généralement en composition symétrique et en expression totémique.', meaning: 'Symbolise l’union du ciel et de la terre ainsi que l’équilibre du yin et du yang, source de croissance de toute chose.', usage: 'Souvent utilisé sur les habits de fête et les vêtements rituels importants.' },
+                de: { name: 'Sonne und Mond', aliases: 'Motiv von gemeinsam leuchtender Sonne und Mond', origin: 'Entstammt der frühen Yi-Verehrung von Sonne, Mond und Sternen und zeigt die Ehrfurcht der Vorfahren vor Himmel, Erde und Natur.', visuals: 'Sonne und Mond erscheinen in symmetrischer, totemartiger Gestaltung.', meaning: 'Symbolisiert die Verbindung von Himmel und Erde sowie das Gleichgewicht von Yin und Yang als Ursprung allen Wachstums.', usage: 'Häufig auf Festkleidung und wichtiger Ritualkleidung verwendet.' },
+                es: { name: 'Sol y luna', aliases: 'Motivo del sol y la luna resplandecientes', origin: 'Procede del culto ancestral Yi al sol, la luna y las estrellas, y expresa reverencia por el cielo, la tierra y la naturaleza.', visuals: 'Forma en la que sol y luna brillan juntos, normalmente con composición simétrica y expresión totémica.', meaning: 'Simboliza la unión del cielo y la tierra y el equilibrio del yin y el yang, origen del crecimiento de todas las cosas.', usage: 'Se usa a menudo en trajes festivos y atuendos rituales importantes.' }
+            },
+            flame: {
+                fr: { name: 'Motif de flamme', aliases: 'Motif du feu', origin: 'Les Yi se nomment eux-mêmes « le peuple du feu » ; le feu symbolise la vie, la chaleur et la civilisation.', visuals: 'Forme de flamme bondissante, principalement en rouge, jaune et orange.', meaning: 'Représente la lumière et l’espoir, et symbolise la vie et la fécondité.', usage: 'Largement employé dans les vêtements quotidiens et les habits de fête.' },
+                de: { name: 'Flammenmuster', aliases: 'Feuermuster', origin: 'Die Yi bezeichnen sich als „Volk des Feuers“; Feuer steht für Leben, Wärme und Zivilisation.', visuals: 'Dynamische Flammenformen, meist in Rot, Gelb und Orange.', meaning: 'Steht für Licht und Hoffnung und symbolisiert Leben und Fortpflanzung.', usage: 'Weit verbreitet in Alltags- und Festkleidung.' },
+                es: { name: 'Motivo de llama', aliases: 'Motivo de fuego', origin: 'Los Yi se llaman a sí mismos “el pueblo del fuego”; el fuego simboliza vida, calidez y civilización.', visuals: 'Forma de llamas dinámicas, generalmente en rojo, amarillo y naranja.', meaning: 'Representa la luz y la esperanza, y simboliza vida y reproducción.', usage: 'Se aplica ampliamente en ropa cotidiana y festiva.' }
+            },
+            sun: {
+                fr: { name: 'Motif du soleil', aliases: 'Motif totem du soleil', origin: 'Les Yi sont un peuple qui vénère le soleil ; ce motif est l’expression totémique de cette adoration ancestrale.', visuals: 'Centre circulaire entouré de rayons, souvent sous forme de soleil à huit ou douze pointes.', meaning: 'Symbolise la dissipation des ténèbres et la chaleur donnée à toutes choses, ainsi que l’aspiration éternelle à une vie meilleure.', usage: 'Souvent brodé sur le col, la poitrine et d’autres emplacements visibles.' },
+                de: { name: 'Sonnenmuster', aliases: 'Sonnentotem-Muster', origin: 'Die Yi verehren die Sonne; das Muster ist eine totemartige Darstellung dieser Ahnenverehrung.', visuals: 'Kreisförmiges Zentrum mit ausstrahlenden Strahlen, oft als acht- oder zwölfzackige Sonne.', meaning: 'Symbolisiert das Vertreiben der Dunkelheit, Wärme für alles Leben und die Sehnsucht nach einem guten Leben.', usage: 'Häufig an Kragen, Brust und anderen gut sichtbaren Stellen gestickt.' },
+                es: { name: 'Motivo del sol', aliases: 'Motivo totémico del sol', origin: 'Los Yi son un pueblo que venera el sol; el motivo expresa de forma totémica esa adoración ancestral.', visuals: 'Centro circular con rayos alrededor, a menudo como sol de ocho o doce puntas.', meaning: 'Simboliza disipar la oscuridad, calentar todas las cosas y aspirar eternamente a una vida mejor.', usage: 'Suele bordarse en cuellos, pecho y otros lugares visibles.' }
+            },
+            wave: {
+                fr: { name: 'Motif de vague', aliases: 'Motif d’onde d’eau', origin: 'Les ancêtres Yi vivaient souvent près de l’eau, fondement de la vie, de la reproduction et de la civilisation.', visuals: 'Courbes ondulées continues, rythmées, qui imitent le mouvement de l’eau.', meaning: 'L’eau nourrit toute chose et symbolise l’abondance des sources et des récoltes.', usage: 'Souvent utilisé sur les manches, les ourlets et les parties en mouvement.' },
+                de: { name: 'Wellenmuster', aliases: 'Wasserwellenmuster', origin: 'Die Yi-Vorfahren lebten oft am Wasser, das Grundlage von Leben, Fortpflanzung und Zivilisation ist.', visuals: 'Fortlaufende wellenförmige Linien, die den Wasserfluss nachbilden.', meaning: 'Wasser nährt alles und steht für reiche Quellen und gute Ernten.', usage: 'Oft an Ärmeln, Säumen und beweglichen Kleidungsbereichen verwendet.' },
+                es: { name: 'Motivo de olas', aliases: 'Motivo de ondas de agua', origin: 'Los antepasados Yi vivían a menudo junto al agua, base de la vida, la reproducción y la civilización.', visuals: 'Curvas onduladas continuas que simulan el movimiento del agua.', meaning: 'El agua nutre todas las cosas y simboliza abundancia de fuentes y cosechas.', usage: 'Se usa en mangas, dobladillos y partes con movimiento.' }
+            },
+            'ram-horn': {
+                fr: { name: 'Motif de corne de bélier', aliases: 'Motif totem du mouton', origin: 'Le mouton est une richesse importante de l’élevage Yi, et son culte totémique a une longue histoire.', visuals: 'Cornes recourbées, généralement en spirale ou en arc symétrique.', meaning: 'Symbolise la prospérité du bétail et une vie sans souci matériel.', usage: 'Souvent brodé sur les vêtements quotidiens.' },
+                de: { name: 'Widderhornmuster', aliases: 'Schaf-Totemmuster', origin: 'Schafe sind wichtiger Viehbestand der Yi; ihre Totemverehrung hat eine lange Geschichte.', visuals: 'Gebogene Hörner, meist symmetrisch als Spirale oder Bogen.', meaning: 'Symbolisiert reiche Viehzucht und ein sorgloses Leben.', usage: 'Häufig auf Alltagskleidung gestickt.' },
+                es: { name: 'Motivo de cuerno de carnero', aliases: 'Motivo totémico de oveja', origin: 'La oveja es una riqueza importante para la ganadería Yi, con una larga tradición totémica.', visuals: 'Forma de cuernos curvos, normalmente en espiral o arco simétrico.', meaning: 'Simboliza abundancia ganadera y una vida sin preocupaciones materiales.', usage: 'Suele bordarse en ropa cotidiana.' }
+            },
+            tiger: {
+                fr: { name: 'Motif du tigre', aliases: 'Totem du tigre Yi', origin: 'Dans les mythes de création Yi, le tigre est l’ancêtre qui ouvrit le ciel et la terre.', visuals: 'Image du tigre ou texture de rayures, avec des lignes puissantes.', meaning: 'Le tigre est l’ancêtre et le gardien du groupe, symbole de force et de majesté.', usage: 'Surtout utilisé dans les vêtements masculins et les tenues de guerrier.' },
+                de: { name: 'Tigermuster', aliases: 'Yi-Tigertotem', origin: 'In der Yi-Schöpfungsmythologie gilt der Tiger als Urahn, der Himmel und Erde öffnete.', visuals: 'Tigerbild oder Streifenstruktur mit kräftigen Linien.', meaning: 'Der Tiger ist Ahne und Schutzgeist der Gemeinschaft und steht für Kraft und Würde.', usage: 'Vor allem in Männerkleidung und Kriegertracht verwendet.' },
+                es: { name: 'Motivo de tigre', aliases: 'Tótem del tigre Yi', origin: 'En la mitología de creación Yi, el tigre es el ancestro que abrió el cielo y la tierra.', visuals: 'Imagen del tigre o textura de rayas con líneas vigorosas.', meaning: 'El tigre es ancestro y guardián del grupo, símbolo de fuerza y autoridad.', usage: 'Se usa sobre todo en ropa masculina y atuendos de guerrero.' }
+            },
+            'ox-horn': {
+                fr: { name: 'Motif de corne de bœuf', aliases: 'Motif totem du bœuf', origin: 'Le bœuf est la force principale du labour et du transport chez les Yi, avec un culte totémique profondément enraciné.', visuals: 'Cornes puissantes et recourbées, généralement en arc symétrique.', meaning: 'Symbolise un climat favorable et des récoltes abondantes.', usage: 'Utilisé dans les vêtements et objets rituels liés à l’agriculture.' },
+                de: { name: 'Ochsenhornmuster', aliases: 'Ochsentotem-Muster', origin: 'Der Ochse ist für Pflügen und Transport der Yi zentral; seine Totemverehrung ist tief verwurzelt.', visuals: 'Kräftig gebogene Ochsenhörner, meist symmetrisch als Bogen.', meaning: 'Symbolisiert günstiges Wetter und reiche Ernten.', usage: 'Verwendet in landwirtschaftsbezogener Kleidung und Ritualgegenständen.' },
+                es: { name: 'Motivo de cuerno de buey', aliases: 'Motivo totémico de buey', origin: 'El buey es fuerza principal para arar y transportar entre los Yi, con una veneración totémica profunda.', visuals: 'Cuernos de buey curvos y fuertes, normalmente en arco simétrico.', meaning: 'Simboliza clima favorable y cosechas abundantes.', usage: 'Se usa en ropa y objetos rituales relacionados con la agricultura.' }
+            },
+            'ox-eye': {
+                fr: { name: 'Motif d’œil de bœuf', aliases: 'Symbole de l’œil de bœuf', origin: 'L’œil du bœuf est considéré comme « l’œil de la loyauté », prolongement du culte du bœuf.', visuals: 'Forme d’œil rond ou ovale avec une pupille centrale.', meaning: 'Évoque protection et clairvoyance, symbole faste pour garder la maison.', usage: 'Souvent brodé sur les vêtements d’enfants.' },
+                de: { name: 'Ochsenaugenmuster', aliases: 'Ochsenaugen-Symbol', origin: 'Das Ochsenauge gilt als „Auge der Treue“ und erweitert die Ochsentotem-Verehrung.', visuals: 'Runde oder ovale Augenform mit Pupille in der Mitte.', meaning: 'Steht für Schutz und Einsicht und gilt als Glückssymbol für Haus und Familie.', usage: 'Häufig auf Kinderkleidung gestickt.' },
+                es: { name: 'Motivo de ojo de buey', aliases: 'Símbolo del ojo de buey', origin: 'El ojo del buey se considera “ojo de lealtad”, extensión del culto totémico al buey.', visuals: 'Forma de ojo redondo u ovalado con pupila central.', meaning: 'Sugiere protección y perspicacia, símbolo auspicioso para proteger el hogar.', usage: 'Suele bordarse en ropa infantil.' }
+            },
+            'crab-claw': {
+                fr: { name: 'Motif de pince de crabe', aliases: 'Symbole de pince de crabe', origin: 'Le crabe vit dans les eaux et marais, exprimant le culte de l’eau et la coexistence avec la nature.', visuals: 'Forme de crabe à multiples pattes avec des lignes symétriques.', meaning: 'Symbolise la prospérité de la lignée et la continuité de la vie.', usage: 'Souvent combiné avec le motif de vague.' },
+                de: { name: 'Krabbenscherenmuster', aliases: 'Krabbenscheren-Symbol', origin: 'Die Krabbe lebt in Gewässern und Sümpfen und steht für Wasserverehrung und Harmonie mit der Natur.', visuals: 'Mehrbeiniges Krabbenmotiv mit symmetrischen Linien.', meaning: 'Symbolisiert zahlreiche Nachkommen und unaufhörliches Leben.', usage: 'Oft zusammen mit Wellenmustern verwendet.' },
+                es: { name: 'Motivo de pinza de cangrejo', aliases: 'Símbolo de pinza de cangrejo', origin: 'El cangrejo vive en aguas y pantanos, expresión del culto al agua y la convivencia con la naturaleza.', visuals: 'Figura de cangrejo con muchas patas y líneas simétricas.', meaning: 'Simboliza prosperidad de la descendencia y continuidad vital.', usage: 'A menudo se combina con motivos de olas.' }
+            },
+            camellia: {
+                fr: { name: 'Motif de camélia', aliases: 'Motif de fleur de thé', origin: 'Le camélia est une fleur native des régions Yi, qui fleurit longtemps en hiver.', visuals: 'Camélia plein aux pétales superposés.', meaning: 'Symbolise la ténacité, la persévérance et la force de survivre.', usage: 'Souvent utilisé sur les vêtements féminins.' },
+                de: { name: 'Kamelienmuster', aliases: 'Teeblütenmuster', origin: 'Die Kamelie ist eine heimische Blume der Yi-Region, die im Winter lange blüht.', visuals: 'Volle Kamelienform mit geschichteten Blütenblättern.', meaning: 'Symbolisiert Zähigkeit, Ausdauer und Überlebenskraft.', usage: 'Häufig in Frauenkleidung verwendet.' },
+                es: { name: 'Motivo de camelia', aliases: 'Motivo de flor de té', origin: 'La camelia es una flor nativa de las zonas Yi, florece en invierno y durante largo tiempo.', visuals: 'Forma de camelia plena con pétalos superpuestos.', meaning: 'Simboliza tenacidad, perseverancia y capacidad de supervivencia.', usage: 'Se usa habitualmente en ropa femenina.' }
+            },
+            'azalea-red': {
+                fr: { name: 'Motif d’azalée rouge', aliases: 'Motif d’azalée', origin: 'L’azalée rouge fleurit au début du printemps en haute montagne, résistante au froid et éclatante.', visuals: 'Forme de fleur rouge vive et brillante.', meaning: 'Symbolise une vitalité tenace et ininterrompue.', usage: 'Motif principal de la fête des torches et des vêtements de mariage.' },
+                de: { name: 'Rotes Azaleenmuster', aliases: 'Azaleenmuster', origin: 'Die rote Azalee blüht im frühen Frühling in den Bergen, kälteresistent und leidenschaftlich.', visuals: 'Leuchtend rote Blütenform.', meaning: 'Symbolisiert widerstandsfähige und unaufhörliche Lebenskraft.', usage: 'Hauptmotiv für Fackelfest- und Hochzeitskleidung.' },
+                es: { name: 'Motivo de azalea roja', aliases: 'Motivo de azalea', origin: 'La azalea roja florece a comienzos de primavera en la alta montaña, resistente al frío y muy viva.', visuals: 'Forma de flor roja, intensa y brillante.', meaning: 'Simboliza vitalidad resistente e inagotable.', usage: 'Motivo principal en la Fiesta de las Antorchas y la ropa de boda.' }
+            },
+            azalea: {
+                fr: { name: 'Motif de fleur Soma', aliases: 'Motif de rhododendron', origin: 'Soma est le nom Yi des rhododendrons de haute montagne.', visuals: 'Fleurs groupées aux couleurs riches.', meaning: 'Symbolise la force vitale qui ne craint pas les difficultés et pousse vers le soleil.', usage: 'Souvent utilisé sur les vêtements de fête.' },
+                de: { name: 'Soma-Blütenmuster', aliases: 'Rhododendronmuster', origin: 'Soma ist der Yi-Name für Berg-Rhododendren.', visuals: 'Gebündelte Blütenformen in vielfältigen Farben.', meaning: 'Symbolisiert Lebenskraft, die Schwierigkeiten nicht fürchtet und der Sonne entgegenwächst.', usage: 'Häufig in Festkleidung verwendet.' },
+                es: { name: 'Motivo de flor Soma', aliases: 'Motivo de rododendro', origin: 'Soma es el nombre Yi para los rododendros de alta montaña.', visuals: 'Flores agrupadas con colores variados.', meaning: 'Simboliza la fuerza vital que no teme las dificultades y crece hacia el sol.', usage: 'Se usa con frecuencia en ropa festiva.' }
+            },
+            'fruit-tree': {
+                fr: { name: 'Motif d’arbre fruitier', aliases: 'Symbole d’arbre fruitier', origin: 'Depuis l’Antiquité, les Yi vivent des montagnes ; l’arbre fruitier symbolise la récolte forestière.', visuals: 'Arbre aux branches et feuilles luxuriantes, chargé de fruits.', meaning: 'Symbolise les greniers pleins et l’abondance des ressources.', usage: 'Souvent brodé sur les vêtements d’enfants et les textiles domestiques.' },
+                de: { name: 'Obstbaummuster', aliases: 'Obstbaum-Symbol', origin: 'Die Yi leben seit jeher von den Bergen; Obstbäume stehen für Erträge aus Wald und Gebirge.', visuals: 'Baumform mit üppigen Zweigen, Blättern und Früchten.', meaning: 'Symbolisiert volle Speicher und reichen Wohlstand.', usage: 'Häufig auf Kinderkleidung und Heimtextilien gestickt.' },
+                es: { name: 'Motivo de árbol frutal', aliases: 'Símbolo de árbol frutal', origin: 'Desde antiguo, los Yi viven de la montaña; el árbol frutal simboliza la cosecha del bosque.', visuals: 'Árbol frondoso con ramas, hojas y abundantes frutos.', meaning: 'Simboliza graneros llenos y abundancia de recursos.', usage: 'Suele bordarse en ropa infantil y textiles del hogar.' }
+            },
+            fern: {
+                fr: { name: 'Motif de fougère', aliases: 'Motif de feuille de fougère', origin: 'Les racines de fougère riches en amidon aidaient les ancêtres à survivre aux famines.', visuals: 'Forme de pousse enroulée de fougère.', meaning: 'Symbolise la ténacité et l’esprit de survie face à l’adversité.', usage: 'Souvent utilisé dans les vêtements quotidiens.' },
+                de: { name: 'Farnmuster', aliases: 'Farnblattmuster', origin: 'Farnwurzeln lieferten Stärke und halfen den Vorfahren, Hungerzeiten zu überstehen.', visuals: 'Eingerollte Sprossform einer Farnpflanze.', meaning: 'Symbolisiert Zähigkeit und Überlebenswillen in schwierigen Zeiten.', usage: 'Häufig in Alltagskleidung verwendet.' },
+                es: { name: 'Motivo de helecho', aliases: 'Motivo de hoja de helecho', origin: 'Las raíces de helecho, ricas en almidón, ayudaron a los antepasados a superar hambrunas.', visuals: 'Forma de brote enrollado de helecho.', meaning: 'Simboliza tenacidad y espíritu de supervivencia ante la adversidad.', usage: 'Se usa a menudo en ropa cotidiana.' }
+            },
+            'fire-steel': {
+                fr: { name: 'Motif de briquet à silex', aliases: 'Motif d’allumage du feu', origin: 'Le briquet à silex est la source du feu et le début de la civilisation.', visuals: 'Forme de l’outil à feu, généralement en arc ou en crochet.', meaning: 'Symbolise la protection du dieu du feu et la continuité de la flamme.', usage: 'Souvent utilisé dans les vêtements de la fête des torches.' },
+                de: { name: 'Feuerstahlmuster', aliases: 'Feuerschläger-Muster', origin: 'Der Feuerstahl ist Quelle des Feuers und Anfang der Zivilisation.', visuals: 'Form eines Feuerwerkzeugs, meist bogen- oder hakenförmig.', meaning: 'Symbolisiert den Segen des Feuergottes und die ewige Flamme.', usage: 'Häufig in Kleidung zum Fackelfest verwendet.' },
+                es: { name: 'Motivo de eslabón de fuego', aliases: 'Motivo para encender fuego', origin: 'El eslabón de fuego es fuente de la llama y comienzo de la civilización.', visuals: 'Forma de herramienta para hacer fuego, normalmente curva o en gancho.', meaning: 'Simboliza la bendición del dios del fuego y la continuidad de la llama.', usage: 'Se usa a menudo en la ropa de la Fiesta de las Antorchas.' }
+            },
+            hearth: {
+                fr: { name: 'Motif du foyer', aliases: 'Motif du foyer à feu', origin: 'Issu des trois pierres du foyer Yi, centre de la maison.', visuals: 'Forme de pierres triangulaires en anneau ou rayonnantes.', meaning: 'Représente la chaleur, la réunion familiale et la continuité de la vie.', usage: 'Utilisé dans les textiles domestiques et les vêtements cérémoniels importants.' },
+                de: { name: 'Herdmuster', aliases: 'Feuerstellenmuster', origin: 'Entstammt den drei Herdsteinen der Yi, dem Zentrum des Hauses.', visuals: 'Ringförmige oder radiale Dreiecksstein-Form.', meaning: 'Steht für Wärme, Zusammenhalt und Fortdauer des Lebens.', usage: 'Verwendet in Heimtextilien und wichtiger Zeremonialkleidung.' },
+                es: { name: 'Motivo del hogar', aliases: 'Motivo del fogón', origin: 'Procede de las tres piedras del fogón Yi, centro del hogar.', visuals: 'Forma de piedras triangulares en anillo o disposición radial.', meaning: 'Representa calidez, reunión familiar y continuidad de la vida.', usage: 'Se usa en textiles del hogar y ropa ceremonial importante.' }
+            },
+            window: {
+                fr: { name: 'Motif de treillis de fenêtre', aliases: 'Motif de treillis en bois', origin: 'Le treillis de fenêtre est un élément central des habitations traditionnelles Yi.', visuals: 'Structure régulière en grille, fondée sur lignes droites, angles droits et symétrie.', meaning: 'Symbolise un foyer solide et une vie stable et heureuse.', usage: 'Souvent utilisé comme décoration de bordure sur les vêtements quotidiens.' },
+                de: { name: 'Fenstergittermuster', aliases: 'Holzgittermuster', origin: 'Das Fenstergitter ist ein Kernelement traditioneller Yi-Wohnhäuser.', visuals: 'Regelmäßige Gitterstruktur mit geraden Linien, rechten Winkeln und Symmetrie.', meaning: 'Symbolisiert ein stabiles Zuhause und ein friedliches Leben.', usage: 'Häufig als Randverzierung in Alltagskleidung verwendet.' },
+                es: { name: 'Motivo de celosía de ventana', aliases: 'Motivo de celosía de madera', origin: 'La celosía de ventana es un componente central de la vivienda tradicional Yi.', visuals: 'Estructura de rejilla regular basada en líneas rectas, ángulos rectos y simetría.', meaning: 'Simboliza un hogar sólido y una vida tranquila y próspera.', usage: 'Se usa a menudo como decoración de borde en ropa cotidiana.' }
+            }
+        };
+
         // 当前状态
         let currentLang = 'zh';
         let currentCategory = 'all';
@@ -768,7 +883,11 @@
 
         // 获取纹样名称
         function getPatternName(pattern) {
-            return pattern.name[currentLang] || pattern.name.zh;
+            return getPatternField(pattern, 'name');
+        }
+
+        function getPatternField(pattern, field) {
+            return patternTranslations[pattern.id]?.[currentLang]?.[field] || pattern[field][currentLang] || pattern[field].zh;
         }
 
         // 获取分类名称
@@ -807,7 +926,7 @@
                 if (searchQuery) {
                     const query = searchQuery.toLowerCase();
                     const name = getPatternName(p).toLowerCase();
-                    const meaning = (p.meaning[currentLang] || p.meaning.zh).toLowerCase();
+                    const meaning = getPatternField(p, 'meaning').toLowerCase();
                     if (!name.includes(query) && !meaning.includes(query)) return false;
                 }
 
@@ -852,7 +971,7 @@
                                     <div class="card-content">
                                         <div class="card-category">${getCategoryName(p.category)}</div>
                                         <h3 class="card-title">${getPatternName(p)}</h3>
-                                        <p class="card-desc">${p.meaning[currentLang] || p.meaning.zh}</p>
+                                        <p class="card-desc">${getPatternField(p, 'meaning')}</p>
                                     </div>
                                 </div>
                             `).join('')}
@@ -878,26 +997,26 @@
                 </div>
                 <div class="modal-category">${getCategoryName(pattern.category)}</div>
                 <h2 class="modal-title">${getPatternName(pattern)}</h2>
-                <p class="modal-aliases">${d.aliases}: ${pattern.aliases[currentLang] || pattern.aliases.zh}</p>
+                <p class="modal-aliases">${d.aliases}: ${getPatternField(pattern, 'aliases')}</p>
 
                 <div class="info-section">
                     <div class="info-title">${d.origin}</div>
-                    <div class="info-text">${pattern.origin[currentLang] || pattern.origin.zh}</div>
+                    <div class="info-text">${getPatternField(pattern, 'origin')}</div>
                 </div>
 
                 <div class="info-section">
                     <div class="info-title">${d.visuals}</div>
-                    <div class="info-text">${pattern.visuals[currentLang] || pattern.visuals.zh}</div>
+                    <div class="info-text">${getPatternField(pattern, 'visuals')}</div>
                 </div>
 
                 <div class="info-section">
                     <div class="info-title">${d.meaning}</div>
-                    <div class="info-text">${pattern.meaning[currentLang] || pattern.meaning.zh}</div>
+                    <div class="info-text">${getPatternField(pattern, 'meaning')}</div>
                 </div>
 
                 <div class="info-section">
                     <div class="info-title">${d.usage}</div>
-                    <div class="info-text">${pattern.usage[currentLang] || pattern.usage.zh}</div>
+                    <div class="info-text">${getPatternField(pattern, 'usage')}</div>
                 </div>
             `;
 
