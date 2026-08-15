@@ -171,25 +171,28 @@
         }
 
         .hero-content {
-            max-width: 800px;
+            width: min(100%, 1200px);
         }
 
         .hero-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: clamp(3rem, 8vw, 5rem);
+            font-size: clamp(2.4rem, 7vw, 5rem);
             font-weight: 700;
             background: linear-gradient(135deg, var(--yi-yellow) 0%, var(--yi-red) 50%, var(--yi-gold) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 1rem;
-            white-space: nowrap;
+            line-height: 1.18;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
 
         .hero-subtitle {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 2vw, 1.25rem);
             color: rgba(255, 255, 255, 0.6);
-            letter-spacing: 4px;
+            letter-spacing: clamp(1px, 0.5vw, 4px);
+            line-height: 1.6;
             margin-bottom: 1.5rem;
         }
 
@@ -197,9 +200,10 @@
             color: rgba(255, 255, 255, 0.5);
             line-height: 1.8;
             margin-bottom: 2rem;
-            max-width: 600px;
+            max-width: 900px;
             margin-left: auto;
             margin-right: auto;
+            overflow-wrap: anywhere;
         }
 
         /* 搜索框 */
