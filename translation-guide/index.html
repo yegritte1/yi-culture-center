@@ -67,6 +67,38 @@
             text-decoration: none;
         }
 
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.25rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 24px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.65);
+            padding: 0.4rem 0.8rem;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .lang-btn.active,
+        .lang-btn:hover {
+            background: var(--yi-yellow);
+            color: var(--yi-black);
+        }
+
         .back-btn {
             background: rgba(181, 17, 17, 0.3);
             border: 1px solid var(--yi-yellow);
@@ -161,7 +193,13 @@
         <nav class="navbar">
             <div class="nav-content">
                 <a href="../index.html" class="logo">彝族文化数字体验中心</a>
-                <a href="../index.html" class="back-btn">← 返回首页</a>
+                <div class="nav-right">
+                    <div class="lang-switch" id="langSwitch">
+                        <button class="lang-btn active" data-lang="zh">中文</button>
+                        <button class="lang-btn" data-lang="de">DE</button>
+                    </div>
+                    <a href="../index.html" class="back-btn">← 返回首页</a>
+                </div>
             </div>
         </nav>
 
@@ -172,36 +210,39 @@
         </section>
 
         <!-- 图片展示 -->
-        <div class="gallery-container">
-            <img src="01.png" alt="翻译手册 第1页" class="translation-image">
-            <img src="02.png" alt="翻译手册 第2页" class="translation-image">
-            <img src="03.png" alt="翻译手册 第3页" class="translation-image">
-            <img src="04.png" alt="翻译手册 第4页" class="translation-image">
-            <img src="05.png" alt="翻译手册 第5页" class="translation-image">
-            <img src="06.png" alt="翻译手册 第6页" class="translation-image">
-            <img src="07.png" alt="翻译手册 第7页" class="translation-image">
-            <img src="08.png" alt="翻译手册 第8页" class="translation-image">
-            <img src="09.png" alt="翻译手册 第9页" class="translation-image">
-            <img src="11.png" alt="翻译手册 第11页" class="translation-image">
-            <img src="12.png" alt="翻译手册 第12页" class="translation-image">
-            <img src="13.png" alt="翻译手册 第13页" class="translation-image">
-            <img src="14.png" alt="翻译手册 第14页" class="translation-image">
-            <img src="15.png" alt="翻译手册 第15页" class="translation-image">
-            <img src="16.png" alt="翻译手册 第16页" class="translation-image">
-            <img src="17.png" alt="翻译手册 第17页" class="translation-image">
-            <img src="18.png" alt="翻译手册 第18页" class="translation-image">
-            <img src="19.png" alt="翻译手册 第19页" class="translation-image">
-            <img src="20.png" alt="翻译手册 第20页" class="translation-image">
-            <img src="21.png" alt="翻译手册 第21页" class="translation-image">
-            <img src="22.png" alt="翻译手册 第22页" class="translation-image">
-            <img src="23.png" alt="翻译手册 第23页" class="translation-image">
-            <img src="24.png" alt="翻译手册 第24页" class="translation-image">
-        </div>
+        <div class="gallery-container" id="galleryContainer"></div>
 
         <!-- 页脚 -->
         <footer class="footer">
             <p class="footer-text">Made with ❤️ for Yi Culture Heritage | 传承彝族文化</p>
         </footer>
     </div>
+
+    <script>
+        const guidePages = {
+            zh: ['01.png', '02.png', '03.png', '04.png', '05.png', '06.png', '07.png', '08.png', '09.png', '11.png', '12.png', '13.png', '14.png', '15.png', '16.png', '17.png', '18.png', '19.png', '20.png', '21.png', '22.png', '23.png', '24.png'],
+            de: ['de/01.png', 'de/02.png', 'de/03.png', 'de/04.png', 'de/05.png', 'de/06.png', 'de/07.png', 'de/08.png', 'de/09.png', 'de/10.png', 'de/11.png', 'de/12.png', 'de/13.png', 'de/14.png', 'de/15.png', 'de/16.png', 'de/17.png', 'de/18.png', 'de/19.png', 'de/20.png', 'de/21.png', 'de/22.png', 'de/23.png', 'de/24.png']
+        };
+
+        let currentLang = 'zh';
+
+        function renderGuide(lang) {
+            currentLang = guidePages[lang] ? lang : 'zh';
+            const galleryContainer = document.getElementById('galleryContainer');
+            galleryContainer.innerHTML = guidePages[currentLang].map((src, index) => `
+                <img src="${src}" alt="翻译手册 第${index + 1}页" class="translation-image">
+            `).join('');
+
+            document.querySelectorAll('.lang-btn').forEach((button) => {
+                button.classList.toggle('active', button.dataset.lang === currentLang);
+            });
+        }
+
+        document.querySelectorAll('.lang-btn').forEach((button) => {
+            button.addEventListener('click', () => renderGuide(button.dataset.lang));
+        });
+
+        renderGuide(currentLang);
+    </script>
 </body>
 </html>
