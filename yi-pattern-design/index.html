@@ -434,6 +434,48 @@
             gap: 1rem;
         }
 
+        .loading-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 108px;
+            height: 108px;
+            border-radius: 999px;
+            border: 6px solid rgba(245, 213, 71, 0.15);
+            border-top-color: rgba(245, 213, 71, 0.88);
+            animation: spin 0.9s linear infinite;
+            box-shadow: 0 0 38px rgba(212, 175, 55, 0.12);
+        }
+
+        .progress-text {
+            max-width: 420px;
+            line-height: 1.8;
+            color: var(--text-soft);
+        }
+
+        .error-text {
+            max-width: 420px;
+            line-height: 1.8;
+            color: rgba(255, 140, 140, 0.95);
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .generated-frame {
             position: relative;
             flex: 1;
@@ -540,7 +582,7 @@
             <section class="hero">
                 <div class="hero-kicker">✦ AI 文生图体验</div>
                 <h1 class="hero-title">定制彝绣</h1>
-                <p class="hero-desc">输入创意，生成彝绣风格图案。当前页面先提供纯静态 UI 框架与交互占位，后续可直接接入阿里云百炼 Wanx 文生图接口。</p>
+                <p class="hero-desc">输入创意，生成彝绣风格图案。页面已接入阿里云百炼 Wanx 文生图接口（异步任务 + 轮询），并会自动追加“彝绣风格”提示词以增强民族纹样效果。</p>
             </section>
 
             <section class="workspace">
@@ -550,7 +592,7 @@
                             <h2 class="panel-title">创意输入区</h2>
                             <p class="panel-note">先描述主体、氛围、颜色与装饰元素，再补充“彝绣风格”等关键词，更容易得到稳定的民族纹样视觉方向。</p>
                         </div>
-                        <span class="status-pill">静态框架</span>
+                        <span class="status-pill">Wanx 已接入</span>
                     </div>
 
                     <div class="prompt-field">
@@ -600,7 +642,14 @@
                                     </svg>
                                 </div>
                                 <strong>等待生成彝绣图案</strong>
-                                <p>输入创意描述后点击“生成图案”。当前为静态演示页面，会先生成本地占位图，便于确认交互与版式结构。</p>
+                                <p>输入创意描述后点击“生成图案”。系统会调用阿里云百炼 Wanx 异步文生图服务，并在完成后展示图片。</p>
+                            </div>
+
+                            <div class="loading-state" id="loadingState">
+                                <div class="spinner" aria-hidden="true"></div>
+                                <strong id="loadingTitle">正在生成图案</strong>
+                                <p class="progress-text" id="loadingProgress">正在提交任务，请稍候…</p>
+                                <p class="error-text" id="loadingError" style="display:none;"></p>
                             </div>
 
                             <div class="generated-state" id="generatedState">
@@ -619,8 +668,8 @@
                         <a class="download-btn" id="downloadBtn" href="#" download="yi-pattern-design.png" aria-disabled="true">下载生成图片</a>
 
                         <div class="api-box">
-                            <span class="api-title">API 接口预留说明</span>
-                            <p>页面底部脚本中已预留 <code>WANX_API_KEY</code>、<code>WANX_API_URL</code> 与 <code>generateWithWanx</code> 位置。后续只需将阿里云百炼 Wanx 文生图 API Key 填入对应常量，并在该函数中补全真实请求逻辑，即可替换当前本地占位图生成流程。</p>
+                            <span class="api-title">API 调用说明</span>
+                            <p>本页通过 <code>POST</code> 创建 Wanx 异步任务获取 <code>task_id</code>，再轮询 <code>GET /api/v1/tasks/{task_id}</code> 直到 <code>SUCCEEDED</code>。生成图片 URL 通常有有效期，页面会尝试自动下载成 Blob 以便稳定展示与下载。</p>
                         </div>
                     </div>
                 </div>
@@ -635,12 +684,30 @@
         const styleChips = document.querySelectorAll('#styleChips .chip');
         const generateBtn = document.getElementById('generateBtn');
         const clearBtn = document.getElementById('clearBtn');
+
         const placeholderState = document.getElementById('placeholderState');
+        const loadingState = document.getElementById('loadingState');
+        const loadingTitle = document.getElementById('loadingTitle');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const loadingError = document.getElementById('loadingError');
+
         const generatedState = document.getElementById('generatedState');
         const resultImage = document.getElementById('resultImage');
         const resultPrompt = document.getElementById('resultPrompt');
         const resultStatus = document.getElementById('resultStatus');
         const downloadBtn = document.getElementById('downloadBtn');
+
+        const YI_STYLE_SUFFIX = '彝族传统刺绣风格，楚雄彝绣，传统纹样，精美刺绣';
+
+        // 阿里云百炼 Wanx 文生图（异步）
+        // 模型：wanx2.1-t2i-turbo
+        // 接口：POST 创建任务拿 task_id，再轮询 GET /api/v1/tasks/{task_id}
+        const WANX_API_KEY = 'sk-ws-H.EPHHMEY.gUIC.MEQCIFkmdOHiMWFgzAkvEnMslz30m5P8mezeUV1gvFJxlg1dAiBj22y1NA4QGp-UdH1BH0GcBE_GxCNSWgu9fWUEqfEz7w';
+        const WANX_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis';
+        const WANX_TASK_URL_PREFIX = 'https://dashscope.aliyuncs.com/api/v1/tasks/';
+
+        let currentBlobUrl = null;
+        let activeRunId = 0;
 
         styleChips.forEach(chip => {
             chip.addEventListener('click', () => {
@@ -662,111 +729,203 @@
             promptInput.focus();
         });
 
-        function escapeXml(value) {
-            return value
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&apos;');
+        function showStage(stage) {
+            placeholderState.style.display = stage === 'placeholder' ? 'flex' : 'none';
+            loadingState.style.display = stage === 'loading' ? 'flex' : 'none';
+            generatedState.style.display = stage === 'generated' ? 'flex' : 'none';
         }
 
-        function createPreviewSvg(prompt) {
-            const safePrompt = escapeXml(prompt);
-            const shortPrompt = safePrompt.length > 42 ? `${safePrompt.slice(0, 42)}...` : safePrompt;
-            return `
-                <svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="1200" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#120909"/>
-                            <stop offset="0.5" stop-color="#4D0909"/>
-                            <stop offset="1" stop-color="#1A1A1A"/>
-                        </linearGradient>
-                        <linearGradient id="gold" x1="180" y1="120" x2="1020" y2="1080" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#F5D547"/>
-                            <stop offset="1" stop-color="#D4AF37"/>
-                        </linearGradient>
-                    </defs>
-                    <rect width="1200" height="1200" rx="48" fill="url(#bg)"/>
-                    <rect x="70" y="70" width="1060" height="1060" rx="36" stroke="url(#gold)" stroke-width="6" stroke-opacity="0.55"/>
-                    <rect x="130" y="130" width="940" height="940" rx="26" stroke="#F5D547" stroke-opacity="0.18" stroke-width="2"/>
-                    <path d="M600 180L684 292L852 348L740 460L852 572L684 628L600 740L516 628L348 572L460 460L348 348L516 292L600 180Z" fill="#B51111" fill-opacity="0.72" stroke="url(#gold)" stroke-width="16"/>
-                    <circle cx="600" cy="460" r="66" fill="#F5D547" fill-opacity="0.92"/>
-                    <circle cx="600" cy="460" r="24" fill="#8B0000" fill-opacity="0.82"/>
-                    <path d="M600 246V674M386 460H814M430 290L770 630M770 290L430 630" stroke="#171717" stroke-opacity="0.52" stroke-width="14"/>
-                    <path d="M245 880C345 778 462 728 600 728C738 728 855 778 955 880" stroke="url(#gold)" stroke-width="24" stroke-linecap="round"/>
-                    <path d="M300 936C390 860 490 822 600 822C710 822 810 860 900 936" stroke="#B51111" stroke-width="16" stroke-linecap="round"/>
-                    <path d="M230 1020H970" stroke="#F5D547" stroke-opacity="0.35" stroke-width="4" stroke-dasharray="18 18"/>
-                    <text x="600" y="1038" text-anchor="middle" fill="#F5D547" fill-opacity="0.88" font-size="40" font-family="Noto Sans SC, Microsoft YaHei, sans-serif">${shortPrompt}</text>
-                </svg>
-            `.trim();
+        function setDownloadDisabled(disabled) {
+            downloadBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+            if (disabled) {
+                downloadBtn.href = '#';
+            }
         }
 
-        function svgToDataUrl(svg) {
-            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        function updateProgress(text, title = '正在生成图案') {
+            loadingTitle.textContent = title;
+            loadingProgress.textContent = text;
+            loadingError.style.display = 'none';
         }
 
-        async function generatePreviewImage(prompt) {
-            const svg = createPreviewSvg(prompt);
-            return svgToDataUrl(svg);
+        function updateError(text) {
+            loadingError.textContent = text;
+            loadingError.style.display = 'block';
         }
 
-        /*
-         * ================= Wanx API 接口预留区域 =================
-         * 1. 将你的阿里云百炼 Wanx API Key 填入 WANX_API_KEY。
-         * 2. 按实际模型修改 WANX_API_URL / 请求 body。
-         * 3. 在 generateWithWanx(prompt) 中完成 fetch 请求并返回图片 URL 或 base64 数据。
-         * 4. 然后把 handleGenerate() 中的 generatePreviewImage(prompt) 替换为 generateWithWanx(prompt)。
-         */
-        const WANX_API_KEY = ''; // 例如：'sk-xxxx'，请在这里填入阿里云百炼 Wanx 文生图 API Key
-        const WANX_API_URL = ''; // 例如：'https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis'
+        function normalizePrompt(rawPrompt) {
+            const trimmed = rawPrompt.trim();
+            if (!trimmed) return '';
+            if (trimmed.includes(YI_STYLE_SUFFIX)) return trimmed;
+            return `${trimmed}，${YI_STYLE_SUFFIX}`;
+        }
 
-        async function generateWithWanx(prompt) {
-            // 示例占位：后续在这里接入真实的 Wanx 文生图接口。
-            // return fetch(WANX_API_URL, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Authorization': `Bearer ${WANX_API_KEY}`,
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         prompt
-            //     })
-            // }).then(res => res.json());
-            throw new Error('Wanx API 尚未接入，请先填写 API Key 并补全请求逻辑。');
+        async function fetchJson(url, options) {
+            const res = await fetch(url, options);
+            let data;
+            try {
+                data = await res.json();
+            } catch (e) {
+                data = null;
+            }
+
+            if (!res.ok) {
+                const message = data?.message || `请求失败（HTTP ${res.status}）`;
+                const code = data?.code ? `：${data.code}` : '';
+                throw new Error(`${message}${code}`);
+            }
+
+            return data;
+        }
+
+        async function createWanxTask(prompt) {
+            return fetchJson(WANX_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${WANX_API_KEY}`,
+                    'Content-Type': 'application/json',
+                    'X-DashScope-Async': 'enable'
+                },
+                body: JSON.stringify({
+                    model: 'wanx2.1-t2i-turbo',
+                    input: {
+                        prompt
+                    },
+                    parameters: {
+                        size: '1024*1024',
+                        n: 1
+                    }
+                })
+            });
+        }
+
+        async function pollWanxTask(taskId, onUpdate, runId) {
+            const startTime = Date.now();
+            const maxAttempts = 80;
+            const intervalMs = 2500;
+
+            for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+                if (runId !== activeRunId) {
+                    throw new Error('已取消当前生成任务。');
+                }
+
+                const elapsed = Math.max(0, Math.round((Date.now() - startTime) / 1000));
+                onUpdate(`任务处理中…（${elapsed}s，轮询 ${attempt}/${maxAttempts}）`);
+
+                const data = await fetchJson(`${WANX_TASK_URL_PREFIX}${encodeURIComponent(taskId)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${WANX_API_KEY}`
+                    }
+                });
+
+                const status = data?.output?.task_status || 'UNKNOWN';
+
+                if (status === 'SUCCEEDED') {
+                    const results = data?.output?.results;
+                    const imageUrl = Array.isArray(results) && results.length ? (results[0]?.url || results[0]?.URL) : null;
+                    if (!imageUrl) {
+                        throw new Error('任务已完成，但未返回图片地址。');
+                    }
+                    return imageUrl;
+                }
+
+                if (status === 'FAILED') {
+                    const msg = data?.message || '任务执行失败，请调整提示词后重试。';
+                    throw new Error(msg);
+                }
+
+                if (status === 'PENDING') {
+                    onUpdate(`任务已提交，等待调度…（${elapsed}s）`);
+                }
+
+                if (status === 'RUNNING') {
+                    onUpdate(`正在生成中…（${elapsed}s）`);
+                }
+
+                await new Promise(resolve => window.setTimeout(resolve, intervalMs));
+            }
+
+            throw new Error('生成超时，请稍后再试或缩短提示词。');
+        }
+
+        async function tryDownloadAsBlob(url) {
+            try {
+                const res = await fetch(url, { mode: 'cors' });
+                const blob = await res.blob();
+                return URL.createObjectURL(blob);
+            } catch (e) {
+                return null;
+            }
         }
 
         async function handleGenerate() {
-            const prompt = promptInput.value.trim();
+            const rawPrompt = promptInput.value.trim();
 
-            if (!prompt) {
+            if (!rawPrompt) {
                 window.alert('请先输入创意描述，再生成图案。');
                 promptInput.focus();
                 return;
             }
 
+            const finalPrompt = normalizePrompt(rawPrompt);
+            activeRunId += 1;
+            const runId = activeRunId;
+
             generateBtn.disabled = true;
             generateBtn.textContent = '生成中...';
             resultStatus.textContent = '正在生成';
-            resultPrompt.textContent = prompt;
+            resultPrompt.textContent = finalPrompt;
+
+            if (currentBlobUrl) {
+                URL.revokeObjectURL(currentBlobUrl);
+                currentBlobUrl = null;
+            }
+
+            setDownloadDisabled(true);
+            showStage('loading');
+            updateProgress('正在提交任务，请稍候…');
 
             try {
-                // 当前先使用本地 SVG 占位图模拟生成结果。
-                // 接入真实接口时，将下一行替换为：const imageUrl = await generateWithWanx(prompt);
-                const imageUrl = await generatePreviewImage(prompt);
+                const taskResp = await createWanxTask(finalPrompt);
+                const taskId = taskResp?.output?.task_id;
 
-                resultImage.src = imageUrl;
-                placeholderState.style.display = 'none';
-                generatedState.style.display = 'flex';
-                downloadBtn.href = imageUrl;
-                downloadBtn.setAttribute('aria-disabled', 'false');
+                if (!taskId) {
+                    throw new Error('任务创建失败：未返回 task_id。');
+                }
+
+                updateProgress(`任务已创建（task_id：${taskId.slice(0, 8)}…），正在等待生成完成…`);
+
+                const imageUrl = await pollWanxTask(taskId, (text) => updateProgress(text), runId);
+
+                updateProgress('生成完成，正在加载图片…', '生成完成');
+
+                const blobUrl = await tryDownloadAsBlob(imageUrl);
+                currentBlobUrl = blobUrl;
+
+                resultImage.src = blobUrl || imageUrl;
+                downloadBtn.href = blobUrl || imageUrl;
+                downloadBtn.download = `yi-pattern-design-${Date.now()}.png`;
+                setDownloadDisabled(false);
+
+                showStage('generated');
                 resultStatus.textContent = '生成完成';
             } catch (error) {
-                window.alert(error.message || '生成失败，请稍后重试。');
+                const message = error?.message || '生成失败，请稍后重试。';
+                updateError(message);
                 resultStatus.textContent = '生成失败';
+                showStage('loading');
+
+                window.setTimeout(() => {
+                    if (runId === activeRunId) {
+                        showStage('placeholder');
+                    }
+                }, 2200);
             } finally {
-                generateBtn.disabled = false;
-                generateBtn.textContent = '生成图案';
+                if (runId === activeRunId) {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = '生成图案';
+                }
             }
         }
 
@@ -777,6 +936,10 @@
                 handleGenerate();
             }
         });
+
+        // 初始状态
+        showStage('placeholder');
+        setDownloadDisabled(true);
     </script>
 </body>
 </html>
