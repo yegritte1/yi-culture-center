@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彝绣识别 | Yi Embroidery Pattern Recognition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yi-red: #b51111;
+            --yi-yellow: #f5d547;
+            --yi-black: #121212;
+            --yi-gold: #d4af37;
+            --yi-dark-red: #8b0000;
+            --panel-bg: rgba(20, 20, 20, 0.88);
+            --panel-border: rgba(212, 175, 55, 0.22);
+            --text-soft: rgba(255, 255, 255, 0.72);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --shadow-gold: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 40px rgba(212, 175, 55, 0.08);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft YaHei', sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(181, 17, 17, 0.22), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(245, 213, 71, 0.08), transparent 28%),
+                var(--yi-black);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .page-shell {
+            position: relative;
+            min-height: 100vh;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(181, 17, 17, 0.05) 10px, rgba(181, 17, 17, 0.05) 20px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(245, 213, 71, 0.03) 10px, rgba(245, 213, 71, 0.03) 20px);
+        }
+
+        .pattern-overlay,
+        .pattern-overlay::before,
+        .pattern-overlay::after {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .pattern-overlay {
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .pattern-overlay::before,
+        .pattern-overlay::after {
+            content: '';
+            width: 340px;
+            height: 340px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transform: rotate(45deg);
+        }
+
+        .pattern-overlay::before {
+            top: 80px;
+            left: -170px;
+            background: radial-gradient(circle, rgba(181, 17, 17, 0.14), transparent 70%);
+        }
+
+        .pattern-overlay::after {
+            right: -150px;
+            bottom: 40px;
+            background: radial-gradient(circle, rgba(245, 213, 71, 0.08), transparent 70%);
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(14px);
+            background: linear-gradient(to bottom, rgba(18, 18, 18, 0.96), rgba(18, 18, 18, 0.65));
+            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+        }
+
+        .nav-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .brand-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-red), var(--yi-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-subtitle {
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            color: var(--yi-yellow);
+            text-decoration: none;
+            border: 1px solid rgba(212, 175, 55, 0.28);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .home-link:hover {
+            transform: translateY(-2px);
+            border-color: rgba(212, 175, 55, 0.58);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.12);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 4rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-top: 1rem;
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.9rem;
+            margin-bottom: 1rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            color: var(--yi-yellow);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: clamp(2.2rem, 5.5vw, 4rem);
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--yi-yellow) 0%, var(--yi-red) 52%, var(--yi-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 8px 24px rgba(181, 17, 17, 0.22);
+        }
+
+        .hero-desc {
+            max-width: 760px;
+            margin: 0 auto;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-soft);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 0.9fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .panel {
+            position: relative;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 1.4rem;
+            box-shadow: var(--shadow-gold);
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 213, 71, 0.7), transparent);
+            opacity: 0.7;
+        }
+
+        .panel-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 1.35rem;
+            color: var(--yi-yellow);
+        }
+
+        .panel-note {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 1.2rem;
+        }
+
+        .upload-zone {
+            position: relative;
+            border: 1.5px dashed rgba(212, 175, 55, 0.4);
+            border-radius: 22px;
+            background:
+                linear-gradient(180deg, rgba(181, 17, 17, 0.07), rgba(255, 255, 255, 0.02)),
+                rgba(0, 0, 0, 0.18);
+            min-height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--yi-yellow);
+            background:
+                linear-gradient(180deg, rgba(245, 213, 71, 0.12), rgba(181, 17, 17, 0.08)),
+                rgba(255, 255, 255, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .upload-zone.has-image {
+            align-items: stretch;
+            padding: 0;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .upload-placeholder,
+        .preview-wrapper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1rem;
+            color: var(--text-soft);
+            padding: 2rem;
+        }
+
+        .upload-icon {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 2rem;
+            color: var(--yi-yellow);
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.16), rgba(212, 175, 55, 0.02));
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            box-shadow: inset 0 0 40px rgba(212, 175, 55, 0.05);
+        }
+
+        .upload-placeholder strong {
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .upload-placeholder p {
+            max-width: 420px;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .preview-wrapper {
+            position: relative;
+            min-height: 360px;
+        }
+
+        .preview-wrapper img {
+            width: 100%;
+            height: 100%;
+            min-height: 360px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .preview-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.45rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            background: rgba(18, 18, 18, 0.72);
+            color: var(--yi-yellow);
+            border: 1px solid rgba(212, 175, 55, 0.28);
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn,
+        .ghost-btn,
+        .lang-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0.85rem 1.3rem;
+            font-size: 0.96rem;
+            cursor: pointer;
+            transition: transform 0.25s ease, opacity 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .action-btn {
+            color: #171717;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.2);
+            font-weight: 600;
+        }
+
+        .action-btn:hover:not(:disabled),
+        .ghost-btn:hover,
+        .lang-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .ghost-btn,
+        .lang-btn {
+            color: white;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .lang-switch {
+            display: inline-flex;
+            gap: 0.6rem;
+        }
+
+        .lang-btn.active {
+            color: #171717;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+            border-color: transparent;
+        }
+
+        .result-state {
+            min-height: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .result-placeholder {
+            flex: 1;
+            border-radius: 22px;
+            border: 1px dashed rgba(212, 175, 55, 0.26);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(181, 17, 17, 0.05));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 0.8rem;
+            padding: 1.5rem;
+        }
+
+        .result-placeholder strong {
+            color: white;
+            font-size: 1.05rem;
+        }
+
+        .result-placeholder p {
+            color: var(--text-soft);
+            line-height: 1.8;
+        }
+
+        .result-card {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .meta-item,
+        .meaning-block,
+        .tip-block,
+        .api-block {
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.14);
+            padding: 1rem 1.05rem;
+        }
+
+        .meta-label,
+        .block-label {
+            font-size: 0.82rem;
+            letter-spacing: 1.5px;
+            color: var(--yi-yellow);
+            margin-bottom: 0.55rem;
+        }
+
+        .meta-value {
+            font-size: 1.08rem;
+            line-height: 1.6;
+            color: white;
+        }
+
+        .meaning-text,
+        .tip-text,
+        .api-block p {
+            color: var(--text-soft);
+            line-height: 1.85;
+            font-size: 0.96rem;
+        }
+
+        .tip-list {
+            color: var(--text-soft);
+            line-height: 1.8;
+            font-size: 0.95rem;
+            padding-left: 1.2rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            background: rgba(181, 17, 17, 0.18);
+            border: 1px solid rgba(181, 17, 17, 0.35);
+            color: #ffcfbf;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+            color: var(--yi-yellow);
+            background: rgba(0, 0, 0, 0.22);
+            padding: 0.12rem 0.35rem;
+            border-radius: 6px;
+        }
+
+        .footer-note {
+            margin-top: 1.6rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 980px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .home-link {
+                justify-content: center;
+            }
+
+            .container {
+                padding: 2rem 1rem 3rem;
+            }
+
+            .panel {
+                padding: 1.1rem;
+            }
+
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-actions,
+            .panel-title-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .lang-switch {
+                width: 100%;
+            }
+
+            .lang-btn,
+            .action-btn,
+            .ghost-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <div class="pattern-overlay"></div>
+
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="brand">
+                    <div class="brand-title">彝绣识别</div>
+                    <div class="brand-subtitle">YI EMBROIDERY PATTERN RECOGNITION</div>
+                </div>
+                <a class="home-link" href="../index.html">← 返回首页</a>
+            </div>
+        </nav>
+
+        <main class="container">
+            <section class="hero">
+                <div class="hero-kicker">✦ AI 文化识别体验</div>
+                <h1 class="hero-title">上传彝绣照片，识别纹样并解读文化寓意</h1>
+                <p class="hero-desc">
+                    这是「彝绣识别」页面的前端 UI 框架版本，已预留图片上传、结果展示与双语切换区域。
+                    后续只需补入视觉大模型 API key 与调用逻辑，即可将页面接入真实识别能力。
+                </p>
+            </section>
+
+            <section class="dashboard">
+                <div class="panel">
+                    <div class="panel-title-row">
+                        <h2 class="panel-title">图片上传区</h2>
+                        <span class="status-pill">等待上传</span>
+                    </div>
+                    <p class="panel-note">支持点击上传或直接拖拽图片到下方区域，上传后将自动显示预览图。建议使用纹样清晰、光线均匀的近景照片。</p>
+
+                    <label class="upload-zone" id="uploadZone" for="imageInput">
+                        <input id="imageInput" type="file" accept="image/*">
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <div class="upload-icon">🧵</div>
+                            <strong>点击上传或拖拽彝绣纹样图片到这里</strong>
+                            <p>支持常见图片格式。当前为 UI 演示框架，上传后可本地预览，点击“开始识别”可查看预置的演示结果与后续 API 接入位置。</p>
+                        </div>
+                        <div class="preview-wrapper" id="previewWrapper" hidden>
+                            <span class="preview-badge">已载入待识别图片</span>
+                            <img id="previewImage" alt="上传预览图">
+                        </div>
+                    </label>
+
+                    <div class="preview-actions">
+                        <button class="action-btn" id="recognizeBtn" disabled>开始识别</button>
+                        <button class="ghost-btn" id="resetBtn" type="button">重新选择图片</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title-row">
+                        <h2 class="panel-title">识别结果区</h2>
+                        <div class="lang-switch" aria-label="双语切换">
+                            <button class="lang-btn active" type="button" data-lang="zh">中文</button>
+                            <button class="lang-btn" type="button" data-lang="en">English</button>
+                        </div>
+                    </div>
+                    <p class="panel-note">结果区预留了“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。当前未接入真实模型时，会展示示例数据。</p>
+
+                    <div class="result-state">
+                        <div class="result-placeholder" id="resultPlaceholder">
+                            <strong>等待识别结果</strong>
+                            <p>请先上传一张彝绣纹样照片，然后点击“开始识别”。接入 API 后，这里会显示模型返回的纹样名称、文化寓意说明以及可扩展的置信度等信息。</p>
+                        </div>
+
+                        <div class="result-card" id="resultCard">
+                            <div class="meta-grid">
+                                <div class="meta-item">
+                                    <div class="meta-label">纹样名称 / Pattern</div>
+                                    <div class="meta-value" id="patternName">--</div>
+                                </div>
+                                <div class="meta-item">
+                                    <div class="meta-label">识别状态 / Status</div>
+                                    <div class="meta-value" id="patternStatus">演示结果（待接入真实 API）</div>
+                                </div>
+                            </div>
+
+                            <div class="meaning-block">
+                                <div class="block-label">文化寓意说明 / Cultural Meaning</div>
+                                <div class="meaning-text" id="meaningText">--</div>
+                            </div>
+
+                            <div class="tip-block">
+                                <div class="block-label">识别提示</div>
+                                <ol class="tip-list">
+                                    <li>可继续扩展字段，例如：纹样类别、来源地区、服饰场景、置信度。</li>
+                                    <li>中英双语内容建议由模型直接返回，或在前端做二次翻译映射。</li>
+                                    <li>正式接入时，请对异常结果、超时状态和空返回做兜底提示。</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" style="margin-top: 1.5rem;">
+                <h2 class="panel-title" style="margin-bottom: 1rem;">API 接口预留说明</h2>
+                <div class="api-block">
+                    <p>页面底部脚本中已预留清晰注释，可直接将视觉大模型的调用逻辑补入 <code>callVisionModel</code> 函数。后续只需填入 API 地址、API key、模型名以及返回结果解析方式，即可完成接入。</p>
+                    <p style="margin-top: 0.7rem;">推荐流程：读取上传图片 → 转成 Base64 或上传 URL → 调用视觉大模型 → 返回纹样名称与寓意说明 → 更新当前结果面板。</p>
+                </div>
+                <p class="footer-note">当前版本为静态前端框架，无外部依赖，适合直接嵌入现有静态站点继续迭代。</p>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const previewImage = document.getElementById('previewImage');
+        const recognizeBtn = document.getElementById('recognizeBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultPlaceholder = document.getElementById('resultPlaceholder');
+        const resultCard = document.getElementById('resultCard');
+        const patternName = document.getElementById('patternName');
+        const patternStatus = document.getElementById('patternStatus');
+        const meaningText = document.getElementById('meaningText');
+        const statusPill = document.querySelector('.status-pill');
+        const langButtons = document.querySelectorAll('.lang-btn');
+
+        let currentLanguage = 'zh';
+        let currentImageFile = null;
+
+        const demoResult = {
+            zh: {
+                name: '火焰纹（示例）',
+                meaning: '火焰纹在彝族刺绣中常象征光明、生命力与祖先精神的延续，也常被理解为对温暖、丰收与家庭守护的祈愿。不同地域支系会在针法、配色与构图上呈现各自特色。'
+            },
+            en: {
+                name: 'Flame Motif (Demo)',
+                meaning: 'In Yi embroidery, the flame motif often symbolizes light, vitality, and the continuation of ancestral spirit. It can also represent wishes for warmth, abundance, and family protection. Different regional groups may express it with distinct stitches, colors, and compositions.'
+            }
+        };
+
+        function updateResult(language) {
+            patternName.textContent = demoResult[language].name;
+            meaningText.textContent = demoResult[language].meaning;
+        }
+
+        function showPreview(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = event => {
+                previewImage.src = event.target.result;
+                uploadPlaceholder.hidden = true;
+                previewWrapper.hidden = false;
+                uploadZone.classList.add('has-image');
+                recognizeBtn.disabled = false;
+                statusPill.textContent = '图片已就绪';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            currentImageFile = file;
+            showPreview(file);
+        }
+
+        imageInput.addEventListener('change', event => {
+            const [file] = event.target.files;
+            handleFile(file);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, event => {
+                event.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, event => {
+                event.preventDefault();
+                uploadZone.classList.remove('dragover');
+            });
+        });
+
+        uploadZone.addEventListener('drop', event => {
+            const file = event.dataTransfer.files[0];
+            handleFile(file);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            imageInput.value = '';
+            currentImageFile = null;
+            previewImage.removeAttribute('src');
+            previewWrapper.hidden = true;
+            uploadPlaceholder.hidden = false;
+            uploadZone.classList.remove('has-image');
+            recognizeBtn.disabled = true;
+            resultCard.style.display = 'none';
+            resultPlaceholder.style.display = 'flex';
+            statusPill.textContent = '等待上传';
+            patternStatus.textContent = '演示结果（待接入真实 API）';
+        });
+
+        langButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                langButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                currentLanguage = button.dataset.lang;
+                if (resultCard.style.display === 'flex') {
+                    updateResult(currentLanguage);
+                }
+            });
+        });
+
+        recognizeBtn.addEventListener('click', async () => {
+            if (!currentImageFile) return;
+
+            statusPill.textContent = '识别演示中';
+            patternStatus.textContent = '正在调用识别流程占位逻辑…';
+            recognizeBtn.disabled = true;
+            recognizeBtn.textContent = '识别中...';
+
+            try {
+                // 当前为演示逻辑：模拟识别延时。
+                await new Promise(resolve => setTimeout(resolve, 700));
+
+                updateResult(currentLanguage);
+                resultPlaceholder.style.display = 'none';
+                resultCard.style.display = 'flex';
+                patternStatus.textContent = '演示结果（待接入真实 API）';
+                statusPill.textContent = '已完成演示';
+            } catch (error) {
+                patternStatus.textContent = '识别失败，请检查后续 API 接入逻辑';
+                statusPill.textContent = '识别异常';
+                console.error(error);
+            } finally {
+                recognizeBtn.disabled = false;
+                recognizeBtn.textContent = '开始识别';
+            }
+        });
+
+        /*
+         * ==================== API 接口预留位置 ====================
+         * 后续接入视觉大模型时，可将真实逻辑补入下方函数。
+         *
+         * 使用说明：
+         * 1. 将 YOUR_API_KEY 替换成你自己的平台密钥。
+         * 2. 将 apiUrl 替换为目标视觉大模型接口地址。
+         * 3. 根据平台要求，把图片转成 base64、文件 URL 或 multipart/form-data。
+         * 4. 在返回结果中解析出：纹样名称（name）、文化寓意说明（meaning_zh / meaning_en）。
+         * 5. 然后在 recognizeBtn 的点击事件里，用真实返回值替换 demoResult 更新 UI。
+         *
+         * 示例伪代码：
+         *
+         * async function callVisionModel(imageBase64) {
+         *   const apiKey = 'YOUR_API_KEY';
+         *   const apiUrl = 'https://your-vision-api-endpoint';
+         *
+         *   const response = await fetch(apiUrl, {
+         *     method: 'POST',
+         *     headers: {
+         *       'Content-Type': 'application/json',
+         *       'Authorization': `Bearer ${apiKey}`
+         *     },
+         *     body: JSON.stringify({
+         *       model: 'your-vision-model-name',
+         *       image: imageBase64,
+         *       prompt: '请识别这张彝绣图片中的纹样类别，并分别输出中文/英文名称与文化寓意说明。'
+         *     })
+         *   });
+         *
+         *   const data = await response.json();
+         *   return {
+         *     nameZh: data.nameZh,
+         *     nameEn: data.nameEn,
+         *     meaningZh: data.meaningZh,
+         *     meaningEn: data.meaningEn
+         *   };
+         * }
+         *
+         * ==========================================================
+         */
+    </script>
+</body>
+</html>
