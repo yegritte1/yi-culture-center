@@ -437,12 +437,27 @@
 
         .meta-item,
         .meaning-block,
+        .detail-block,
         .tip-block,
         .api-block {
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(212, 175, 55, 0.14);
             padding: 1rem 1.05rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-block {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(181, 17, 17, 0.045));
+        }
+
+        .detail-block.wide {
+            grid-column: 1 / -1;
         }
 
         .meta-label,
@@ -460,6 +475,7 @@
         }
 
         .meaning-text,
+        .detail-text,
         .tip-text,
         .api-block p {
             color: var(--text-soft);
@@ -542,7 +558,8 @@
                 padding: 1.1rem;
             }
 
-            .meta-grid {
+            .meta-grid,
+            .detail-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -644,8 +661,27 @@
                             </div>
 
                             <div class="meaning-block">
-                                <div class="block-label">文化寓意说明 / Cultural Meaning</div>
+                                <div class="block-label">文化内涵 / Cultural Connotation</div>
                                 <div class="meaning-text" id="meaningText">--</div>
+                            </div>
+
+                            <div class="detail-grid" id="detailGrid">
+                                <div class="detail-block">
+                                    <div class="block-label" id="aliasLabel">别名 / Alias</div>
+                                    <div class="detail-text" id="aliasText">--</div>
+                                </div>
+                                <div class="detail-block">
+                                    <div class="block-label" id="originLabel">溯源与历史 / Origins & History</div>
+                                    <div class="detail-text" id="originText">--</div>
+                                </div>
+                                <div class="detail-block">
+                                    <div class="block-label" id="visualLabel">视觉构成 / Visual Composition</div>
+                                    <div class="detail-text" id="visualText">--</div>
+                                </div>
+                                <div class="detail-block">
+                                    <div class="block-label" id="usageLabel">应用与传承 / Application & Heritage</div>
+                                    <div class="detail-text" id="usageText">--</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -668,6 +704,10 @@
         const patternName = document.getElementById('patternName');
         const patternStatus = document.getElementById('patternStatus');
         const meaningText = document.getElementById('meaningText');
+        const aliasText = document.getElementById('aliasText');
+        const originText = document.getElementById('originText');
+        const visualText = document.getElementById('visualText');
+        const usageText = document.getElementById('usageText');
         const statusPill = document.querySelector('.status-pill');
         const langButtons = document.querySelectorAll('.lang-btn');
 
@@ -704,25 +744,76 @@
             { id: 'octagonal-flower', image: '../yi-pattern-gallery/patterns/octagonal-flower.png', zh: { name: '八角花纹', meaning: '象征八方和合、繁荣兴旺与对圆满生活的祝愿。' }, en: { name: 'Octagonal Flower Pattern', meaning: 'Symbolizes harmony in all directions, prosperity, and wishes for completeness.' } }
         ];
 
+        const patternAliases = {
+            'sun-moon': { zh: '太阳月亮纹', en: 'Solar and Lunar Motif' },
+            flame: { zh: '火纹', en: 'Fire Pattern' },
+            sun: { zh: '太阳图腾纹', en: 'Sun Totem Pattern' },
+            wave: { zh: '水波纹', en: 'Water Wave Pattern' },
+            'ram-horn': { zh: '羊图腾纹', en: 'Sheep Totem Pattern' },
+            tiger: { zh: '彝族虎图腾纹', en: 'Yi Tiger Totem' },
+            'ox-horn': { zh: '牛图腾纹', en: 'Ox Totem Pattern' },
+            'ox-eye': { zh: '牛目纹', en: 'Ox Eye Symbol' },
+            'crab-claw': { zh: '蟹爪纹', en: 'Crab Claw Symbol' },
+            camellia: { zh: '茶花纹', en: 'Tea Flower Pattern' },
+            'azalea-red': { zh: '马樱花纹', en: 'Red Azalea Pattern' },
+            azalea: { zh: '杜鹃花纹', en: 'Rhododendron Pattern' },
+            'fruit-tree': { zh: '草木叶纹', en: 'Meadow Leaf Motif' },
+            fern: { zh: '蕨菜纹', en: 'Fern Sprout Pattern' },
+            'fire-steel': { zh: '火镰取火纹', en: 'Fire Steel Pattern' },
+            hearth: { zh: '火塘三石纹', en: 'Three-Hearth-Stone Motif' },
+            window: { zh: '木格纹', en: 'Wood Lattice Pattern' },
+            bird: { zh: '飞鸟纹', en: 'Flying Bird Motif' },
+            'horse-tooth': { zh: '马齿纹', en: 'Horse-Tooth Motif' },
+            'rooster-comb': { zh: '鸡冠花形纹', en: 'Cockscomb Motif' },
+            rainbow: { zh: '虹桥纹', en: 'Rainbow Bridge Motif' },
+            star: { zh: '星辰纹', en: 'Starlight Motif' },
+            'stone-steps': { zh: '阶梯纹', en: 'Stepped Stone Motif' },
+            'octagonal-flower': { zh: '八瓣花纹', en: 'Eight-Petal Flower Motif' }
+        };
+
+        patternLibrary.forEach(pattern => {
+            pattern.zh.alias = patternAliases[pattern.id]?.zh || pattern.zh.name;
+            pattern.zh.origin = pattern.zh.origin || `${pattern.zh.name}源自云南楚雄彝族传统生活、自然观察与刺绣审美，是彝绣纹样体系中用于表达族群记忆和生活祝愿的重要图案。`;
+            pattern.zh.visual = pattern.zh.visual || `${pattern.zh.name}通常以几何化、对称化和连续化的构图呈现，常通过红、黄、黑等高对比色彩强化纹样轮廓与节庆气质。`;
+            pattern.zh.usage = pattern.zh.usage || `${pattern.zh.name}常见于服饰、围腰、帽饰、挎包及节庆装饰中，在当代文创、服装图案和公共视觉设计中也可延展应用。`;
+            pattern.en.alias = patternAliases[pattern.id]?.en || pattern.en.name;
+            pattern.en.origin = pattern.en.origin || `${pattern.en.name} comes from traditional life, natural observation, and embroidery aesthetics in Chuxiong Yi culture, carrying community memory and blessings for daily life.`;
+            pattern.en.visual = pattern.en.visual || `${pattern.en.name} is often expressed through geometric, symmetrical, and repeated compositions, using high-contrast colors such as red, yellow, and black to strengthen the motif and festive character.`;
+            pattern.en.usage = pattern.en.usage || `${pattern.en.name} appears on garments, aprons, headdresses, bags, and festival decorations, and can also be extended into contemporary cultural products, fashion patterns, and visual design.`;
+        });
+
         let currentLanguage = 'zh';
         let currentImageFile = null;
         let recognitionResult = null;
 
         function updateResult(language) {
             if (!recognitionResult) return;
-            patternName.textContent = recognitionResult[language].name;
-            meaningText.textContent = recognitionResult[language].meaning;
+            const result = recognitionResult[language];
+            patternName.textContent = result.name;
+            meaningText.textContent = result.meaning;
+            aliasText.textContent = result.alias || '--';
+            originText.textContent = result.origin || '--';
+            visualText.textContent = result.visual || '--';
+            usageText.textContent = result.usage || '--';
         }
 
         function normalizeRecognitionResult(result) {
             return {
                 zh: {
                     name: result?.zh?.name || '未能确认纹样名称',
-                    meaning: result?.zh?.meaning || '模型未返回完整中文寓意，请更换更清晰的纹样图片后重试。'
+                    alias: result?.zh?.alias || result?.zh?.name || '暂无别名信息',
+                    origin: result?.zh?.origin || '暂无溯源与历史信息。',
+                    visual: result?.zh?.visual || '暂无视觉构成信息。',
+                    meaning: result?.zh?.meaning || '模型未返回完整中文寓意，请更换更清晰的纹样图片后重试。',
+                    usage: result?.zh?.usage || '暂无应用与传承信息。'
                 },
                 en: {
                     name: result?.en?.name || 'Pattern not identified',
-                    meaning: result?.en?.meaning || 'The model did not return a complete English cultural meaning. Please try again with a clearer pattern image.'
+                    alias: result?.en?.alias || result?.en?.name || 'No alias available',
+                    origin: result?.en?.origin || 'No origins and history information available.',
+                    visual: result?.en?.visual || 'No visual composition information available.',
+                    meaning: result?.en?.meaning || 'The model did not return a complete English cultural meaning. Please try again with a clearer pattern image.',
+                    usage: result?.en?.usage || 'No application and heritage information available.'
                 }
             };
         }
@@ -832,7 +923,7 @@
                             content: [
                                 {
                                     type: 'text',
-                                    text: '请判断图片中是否包含云南楚雄地区彝族传统纹样。常见类别包括八角纹、山茶花纹、马缨花纹、火镰纹、羊角纹等楚雄彝绣典型纹样。如果上传的图片不是彝族纹样，或不属于楚雄彝绣范畴，请直接说明“未识别到楚雄彝族纹样”。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name（纹样名称）和 meaning（文化寓意）。中文结果需包含中文纹样名称和中文文化寓意；英文结果需包含英文纹样名称和英文文化寓意。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
+                                    text: '请判断图片中是否包含云南楚雄地区彝族传统纹样。常见类别包括八角纹、山茶花纹、马缨花纹、火镰纹、羊角纹等楚雄彝绣典型纹样。如果上传的图片不是彝族纹样，或不属于楚雄彝绣范畴，请直接说明“未识别到楚雄彝族纹样”。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name（纹样名称）、alias（别名）、origin（溯源与历史）、visual（视觉构成）、meaning（文化内涵）、usage（应用与传承）。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
                                 },
                                 {
                                     type: 'image_url',
@@ -951,8 +1042,8 @@
                         zh: localMatch.pattern.zh,
                         en: localMatch.pattern.en
                     };
-                    patternStatus.textContent = `本地匹配成功（相似度 ${Math.round(localMatch.similarity * 100)}%）`;
-                    statusPill.textContent = '已本地匹配';
+                    patternStatus.textContent = '✓ 识别成功';
+                    statusPill.textContent = '已识别';
                 } else {
                     patternStatus.textContent = '本地未匹配，正在调用 Qwen-VL 识别...';
                     recognitionResult = await callQwenVisionModel(imageDataUrl);
