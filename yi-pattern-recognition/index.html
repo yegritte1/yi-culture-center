@@ -580,11 +580,11 @@
 
         <main class="container">
             <section class="hero">
-                <div class="hero-kicker">✦ AI 文化识别体验</div>
-                <h1 class="hero-title">上传彝绣照片，识别纹样并解读文化寓意</h1>
+                <div class="hero-kicker">✦ 纹样识别体验</div>
+                <h1 class="hero-title">上传彝绣照片，匹配纹样并解读文化寓意</h1>
                 <p class="hero-desc">
-                    上传纹样清晰的彝绣照片后，页面将调用阿里云百炼 Qwen-VL 视觉大模型，
-                    识别纹样类别并生成中英双语文化寓意解析。
+                    上传纹样清晰的彝绣照片后，页面将通过本地图片特征匹配技术，
+                    从数字画廊中寻找最相似的楚雄彝族传统纹样；若本地未命中，再调用 Qwen-VL 进行补充识别。
                 </p>
             </section>
 
@@ -601,7 +601,7 @@
                         <div class="upload-placeholder" id="uploadPlaceholder">
                             <div class="upload-icon">🧵</div>
                             <strong>点击上传或拖拽彝绣纹样图片到这里</strong>
-                            <p>支持常见图片格式。上传后可本地预览，点击“开始识别”将调用 Qwen-VL 视觉大模型识别彝绣纹样。</p>
+                            <p>支持常见图片格式。上传后可本地预览，点击“开始识别”将通过本地算法进行纹样比对。</p>
                         </div>
                         <div class="preview-wrapper" id="previewWrapper" hidden>
                             <span class="preview-badge">已载入待识别图片</span>
@@ -623,7 +623,7 @@
                             <button class="lang-btn" type="button" data-lang="en">English</button>
                         </div>
                     </div>
-                    <p class="panel-note">结果区展示“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。识别结果由 Qwen-VL 根据上传图片实时生成。</p>
+                    <p class="panel-note">结果区展示“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。识别流程会优先从数字画廊库中本地匹配，未命中时再调用 Qwen-VL 补充识别。</p>
 
                     <div class="result-state">
                         <div class="result-placeholder" id="resultPlaceholder">
@@ -639,7 +639,7 @@
                                 </div>
                                 <div class="meta-item">
                                     <div class="meta-label">识别状态 / Status</div>
-                                    <div class="meta-value" id="patternStatus">识别结果（由 Qwen-VL 生成）</div>
+                                    <div class="meta-value" id="patternStatus">识别结果（本地匹配优先，必要时调用 Qwen-VL）</div>
                                 </div>
                             </div>
 
@@ -674,6 +674,35 @@
         const API_KEY = 'sk-ws-H.EPHHMEY.gUIC.MEQCIFkmdOHiMWFgzAkvEnMslz30m5P8mezeUV1gvFJxlg1dAiBj22y1NA4QGp-UdH1BH0GcBE_GxCNSWgu9fWUEqfEz7w';
         const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
         const MODEL_NAME = 'qwen-vl-max';
+        const HASH_SIZE = 16;
+        const LOCAL_MATCH_THRESHOLD = 0.72;
+
+        const patternLibrary = [
+            { id: 'sun-moon', image: '../yi-pattern-gallery/patterns/sun-moon.png', zh: { name: '日月纹', meaning: '象征天地相合、阴阳平衡，是万物生长的根源。' }, en: { name: 'Sun and Moon', meaning: 'Symbolizes the union of heaven and earth, balance of yin and yang.' } },
+            { id: 'flame', image: '../yi-pattern-gallery/patterns/flame.png', zh: { name: '火焰纹', meaning: '代表光明与希望，象征生命与繁衍。' }, en: { name: 'Flame Pattern', meaning: 'Represents light and hope, symbolizing life and reproduction.' } },
+            { id: 'sun', image: '../yi-pattern-gallery/patterns/sun.png', zh: { name: '太阳纹', meaning: '象征驱散黑暗、温暖万物，是对美好生活的永恒向往。' }, en: { name: 'Sun Pattern', meaning: 'Symbolizes dispelling darkness and warming all things.' } },
+            { id: 'wave', image: '../yi-pattern-gallery/patterns/wave.png', zh: { name: '波浪纹', meaning: '水孕育万物，象征水源充沛、五谷丰登。' }, en: { name: 'Wave Pattern', meaning: 'Water nourishes all things, symbolizing abundance.' } },
+            { id: 'ram-horn', image: '../yi-pattern-gallery/patterns/ram-horn.png', zh: { name: '羊角纹', meaning: '象征畜牧丰收、衣食无忧。' }, en: { name: 'Ram Horn Pattern', meaning: 'Symbolizes abundant livestock and comfortable life.' } },
+            { id: 'tiger', image: '../yi-pattern-gallery/patterns/tiger.png', zh: { name: '虎纹', meaning: '虎是族群始祖与守护神，象征力量与威严。' }, en: { name: 'Tiger Pattern', meaning: 'Tiger is the ancestor and guardian, symbolizing power.' } },
+            { id: 'ox-horn', image: '../yi-pattern-gallery/patterns/ox-horn.png', zh: { name: '牛角纹', meaning: '象征风调雨顺、五谷丰登。' }, en: { name: 'Ox Horn Pattern', meaning: 'Symbolizes good weather and abundant harvest.' } },
+            { id: 'ox-eye', image: '../yi-pattern-gallery/patterns/ox-eye.png', zh: { name: '牛眼纹', meaning: '寓意守护与洞察，是“镇宅护家”的吉祥符号。' }, en: { name: 'Ox Eye Pattern', meaning: 'Represents guardianship and insight.' } },
+            { id: 'crab-claw', image: '../yi-pattern-gallery/patterns/crab-claw.png', zh: { name: '蟹足纹', meaning: '象征族群人丁兴旺、生生不息。' }, en: { name: 'Crab Claw Pattern', meaning: 'Symbolizes prosperous descendants.' } },
+            { id: 'camellia', image: '../yi-pattern-gallery/patterns/camellia.png', zh: { name: '山茶花纹', meaning: '象征坚韧不拔、顽强生存的精神。' }, en: { name: 'Camellia Pattern', meaning: 'Symbolizes resilience and perseverance.' } },
+            { id: 'azalea-red', image: '../yi-pattern-gallery/patterns/maying-flower.png', zh: { name: '马缨花纹', meaning: '象征顽强的生命力、生生不息。' }, en: { name: 'Red Azalea Pattern', meaning: 'Symbolizes resilient vitality.' } },
+            { id: 'azalea', image: '../yi-pattern-gallery/patterns/soma-flower.png', zh: { name: '索玛花纹', meaning: '象征“不畏艰难、向阳而生”的生命力量。' }, en: { name: 'Azalea Pattern', meaning: 'Symbolizes life force facing challenges.' } },
+            { id: 'fruit-tree', image: '../yi-pattern-gallery/patterns/grass-leaf.png', zh: { name: '果树纹', meaning: '象征粮食满仓、物产丰饶。' }, en: { name: 'Fruit Tree Pattern', meaning: 'Symbolizes abundant harvest.' } },
+            { id: 'fern', image: '../yi-pattern-gallery/patterns/fern.png', zh: { name: '蕨芨纹', meaning: '象征坚韧不拔、逆境求生的民族精神。' }, en: { name: 'Fern Pattern', meaning: 'Symbolizes resilience in adversity.' } },
+            { id: 'fire-steel', image: '../yi-pattern-gallery/patterns/fire-steel.png', zh: { name: '火镰纹', meaning: '象征火神庇佑、火种永续。' }, en: { name: 'Fire Steel Pattern', meaning: 'Symbolizes fire god’s blessing and eternal flame.' } },
+            { id: 'hearth', image: '../yi-pattern-gallery/patterns/guozhuang.png', zh: { name: '锅庄纹', meaning: '代表温暖、团圆、生命延续。' }, en: { name: 'Hearth Pattern', meaning: 'Represents warmth, reunion, and life continuation.' } },
+            { id: 'window', image: '../yi-pattern-gallery/patterns/window.png', zh: { name: '窗格纹', meaning: '象征家宅稳固、安居乐业。' }, en: { name: 'Window Lattice Pattern', meaning: 'Symbolizes stable home and peaceful life.' } },
+            { id: 'bird', image: '../yi-pattern-gallery/patterns/bird.png', zh: { name: '鸟纹', meaning: '象征自由、灵动与族群对自然生命的敬畏。' }, en: { name: 'Bird Pattern', meaning: 'Symbolizes freedom, vitality, and reverence for natural life.' } },
+            { id: 'horse-tooth', image: '../yi-pattern-gallery/patterns/horse-tooth.png', zh: { name: '马牙纹', meaning: '象征坚毅、力量与山地生活中的远行守护。' }, en: { name: 'Horse Tooth Pattern', meaning: 'Symbolizes strength, perseverance, and protection on journeys.' } },
+            { id: 'rooster-comb', image: '../yi-pattern-gallery/patterns/rooster-comb.png', zh: { name: '鸡冠纹', meaning: '象征吉祥、醒觉与迎接光明的生活愿望。' }, en: { name: 'Rooster Comb Pattern', meaning: 'Symbolizes auspiciousness, alertness, and the wish for light.' } },
+            { id: 'rainbow', image: '../yi-pattern-gallery/patterns/rainbow.png', zh: { name: '彩虹纹', meaning: '象征天地沟通、雨后新生与美好祝愿。' }, en: { name: 'Rainbow Pattern', meaning: 'Symbolizes connection between heaven and earth, renewal, and good wishes.' } },
+            { id: 'star', image: '../yi-pattern-gallery/patterns/star.png', zh: { name: '星辰纹', meaning: '象征祖先指引、夜空秩序与对平安生活的祈愿。' }, en: { name: 'Star Pattern', meaning: 'Symbolizes ancestral guidance, cosmic order, and prayers for peace.' } },
+            { id: 'stone-steps', image: '../yi-pattern-gallery/patterns/stone-steps.png', zh: { name: '石阶纹', meaning: '象征步步向上、道路延展与家园根基稳固。' }, en: { name: 'Stone Steps Pattern', meaning: 'Symbolizes steady progress, pathways, and a stable homeland.' } },
+            { id: 'octagonal-flower', image: '../yi-pattern-gallery/patterns/octagonal-flower.png', zh: { name: '八角花纹', meaning: '象征八方和合、繁荣兴旺与对圆满生活的祝愿。' }, en: { name: 'Octagonal Flower Pattern', meaning: 'Symbolizes harmony in all directions, prosperity, and wishes for completeness.' } }
+        ];
 
         let currentLanguage = 'zh';
         let currentImageFile = null;
@@ -737,6 +766,100 @@
             });
         }
 
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.crossOrigin = 'anonymous';
+                image.onload = () => resolve(image);
+                image.onerror = () => reject(new Error(`参考图加载失败：${src}`));
+                image.src = src;
+            });
+        }
+
+        function createAverageHash(image) {
+            const canvas = document.createElement('canvas');
+            canvas.width = HASH_SIZE;
+            canvas.height = HASH_SIZE;
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+            context.drawImage(image, 0, 0, HASH_SIZE, HASH_SIZE);
+            const pixels = context.getImageData(0, 0, HASH_SIZE, HASH_SIZE).data;
+            const grayValues = [];
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                grayValues.push((pixels[i] * 0.299) + (pixels[i + 1] * 0.587) + (pixels[i + 2] * 0.114));
+            }
+
+            const average = grayValues.reduce((sum, value) => sum + value, 0) / grayValues.length;
+            return grayValues.map(value => value >= average ? 1 : 0);
+        }
+
+        function compareHashes(hashA, hashB) {
+            const sameCount = hashA.reduce((count, value, index) => count + (value === hashB[index] ? 1 : 0), 0);
+            return sameCount / hashA.length;
+        }
+
+        async function findLocalPatternMatch(imageDataUrl) {
+            const uploadedImage = await loadImage(imageDataUrl);
+            const uploadedHash = createAverageHash(uploadedImage);
+            const references = await Promise.all(patternLibrary.map(async pattern => {
+                const referenceImage = await loadImage(pattern.image);
+                return {
+                    pattern,
+                    similarity: compareHashes(uploadedHash, createAverageHash(referenceImage))
+                };
+            }));
+            const bestMatch = references.sort((a, b) => b.similarity - a.similarity)[0];
+            return bestMatch?.similarity >= LOCAL_MATCH_THRESHOLD ? bestMatch : null;
+        }
+
+        async function callQwenVisionModel(imageDataUrl) {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: MODEL_NAME,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: '你是一名云南楚雄彝族传统纹样识别与文化解读专家。只识别和分析云南楚雄地区彝族传统纹样。'
+                        },
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: '请判断图片中是否包含云南楚雄地区彝族传统纹样。常见类别包括八角纹、山茶花纹、马缨花纹、火镰纹、羊角纹等楚雄彝绣典型纹样。如果上传的图片不是彝族纹样，或不属于楚雄彝绣范畴，请直接说明“未识别到楚雄彝族纹样”。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name（纹样名称）和 meaning（文化寓意）。中文结果需包含中文纹样名称和中文文化寓意；英文结果需包含英文纹样名称和英文文化寓意。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
+                                },
+                                {
+                                    type: 'image_url',
+                                    image_url: {
+                                        url: imageDataUrl
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    response_format: {
+                        type: 'json_object'
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API 请求失败: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
+            }
+
+            const data = await response.json();
+            let content = data.choices[0].message.content;
+            content = content.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
+            return normalizeRecognitionResult(JSON.parse(content));
+        }
+
         function showPreview(file) {
             if (!file) return;
             const reader = new FileReader();
@@ -794,7 +917,7 @@
             resultPlaceholder.style.display = 'flex';
             statusPill.textContent = '等待上传';
             statusPill.classList.remove('loading');
-            patternStatus.textContent = '识别结果（由 Qwen-VL 生成）';
+            patternStatus.textContent = '识别结果（本地匹配优先，必要时调用 Qwen-VL）';
         });
 
         langButtons.forEach(button => {
@@ -813,7 +936,7 @@
 
             statusPill.textContent = '识别中...';
             statusPill.classList.add('loading');
-            patternStatus.textContent = '正在通过 Qwen-VL 视觉大模型识别纹样...';
+            patternStatus.textContent = '正在进行本地纹样匹配...';
             recognizeBtn.disabled = true;
             recognizeBtn.textContent = '识别中...';
             resultCard.style.display = 'none';
@@ -821,61 +944,25 @@
 
             try {
                 const imageDataUrl = await fileToJpegDataUrl(currentImageFile);
-                
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${API_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: MODEL_NAME,
-                        messages: [
-                            {
-                                role: 'system',
-                                content: '你是一名云南楚雄彝族传统纹样识别与文化解读专家。只识别和分析云南楚雄地区彝族传统纹样。'
-                            },
-                            {
-                                role: 'user',
-                                content: [
-                                    {
-                                        type: 'text',
-                                        text: '请判断图片中是否包含云南楚雄地区彝族传统纹样。常见类别包括八角纹、山茶花纹、马缨花纹、火镰纹、羊角纹等楚雄彝绣典型纹样。如果上传的图片不是彝族纹样，或不属于楚雄彝绣范畴，请直接说明“未识别到楚雄彝族纹样”。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name（纹样名称）和 meaning（文化寓意）。中文结果需包含中文纹样名称和中文文化寓意；英文结果需包含英文纹样名称和英文文化寓意。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
-                                    },
-                                    {
-                                        type: 'image_url',
-                                        image_url: {
-                                            url: imageDataUrl
-                                        }
-                                    }
-                                ]
-                            }
-                        ],
-                        response_format: {
-                            type: 'json_object'
-                        }
-                    })
-                });
+                const localMatch = await findLocalPatternMatch(imageDataUrl);
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`API 请求失败: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
+                if (localMatch) {
+                    recognitionResult = {
+                        zh: localMatch.pattern.zh,
+                        en: localMatch.pattern.en
+                    };
+                    patternStatus.textContent = `本地匹配成功（相似度 ${Math.round(localMatch.similarity * 100)}%）`;
+                    statusPill.textContent = '已本地匹配';
+                } else {
+                    patternStatus.textContent = '本地未匹配，正在调用 Qwen-VL 识别...';
+                    recognitionResult = await callQwenVisionModel(imageDataUrl);
+                    patternStatus.textContent = 'AI 识别成功';
+                    statusPill.textContent = '已识别';
                 }
-
-                const data = await response.json();
-                let content = data.choices[0].message.content;
-                
-                // 尝试清洗可能存在的 markdown 代码块
-                content = content.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
-                
-                recognitionResult = normalizeRecognitionResult(JSON.parse(content));
 
                 updateResult(currentLanguage);
                 resultPlaceholder.style.display = 'none';
                 resultCard.style.display = 'flex';
-                patternStatus.textContent = '识别成功';
-                statusPill.textContent = '已识别';
             } catch (error) {
                 console.error('Recognition error:', error);
                 showFriendlyError(error);
