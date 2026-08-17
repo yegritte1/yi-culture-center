@@ -723,12 +723,26 @@
             resultCard.style.display = 'flex';
         }
 
-        async function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
+        async function fileToJpegDataUrl(file) {
+            const sourceDataUrl = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = error => reject(error);
+            });
+
+            return new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = image.naturalWidth;
+                    canvas.height = image.naturalHeight;
+                    const context = canvas.getContext('2d');
+                    context.drawImage(image, 0, 0);
+                    resolve(canvas.toDataURL('image/jpeg', 0.92));
+                };
+                image.onerror = () => reject(new Error('图片读取失败，请更换图片后重试'));
+                image.src = sourceDataUrl;
             });
         }
 
@@ -815,38 +829,47 @@
             resultPlaceholder.style.display = 'flex';
 
             try {
-                const base64Image = await fileToBase64(currentImageFile);
+                const imageDataUrl = await fileToJpegDataUrl(currentImageFile);
                 
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         model: MODEL_NAME,
                         messages: [
                             {
+                                role: 'system',
+                                content: '你是一名云南楚雄彝族传统纹样识别与文化解读专家。只识别和分析云南楚雄地区彝族传统纹样。'
+                            },
+                            {
                                 role: 'user',
                                 content: [
                                     {
                                         type: 'text',
-                                        text: '你是一名云南楚雄彝族传统纹样识别与文化解读专家。请只识别和分析云南楚雄地区彝族传统纹样，常见类别包括八角纹、山茶花纹、马缨花纹、火镰纹、羊角纹等楚雄彝绣典型纹样。如果上传的图片不是彝族纹样，或不属于楚雄彝绣范畴，请直接说明“未识别到楚雄彝族纹样”。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name（纹样名称）和 meaning（文化寓意）。中文结果需包含中文纹样名称和中文文化寓意；英文结果需包含英文纹样名称和英文文化寓意。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
+                                        text: '请判断图片中是否包含云南楚雄地区彝族传统纹样。常见类别包括八角纹、山茶花纹、马缨花纹、火镰纹、羊角纹等楚雄彝绣典型纹样。如果上传的图片不是彝族纹样，或不属于楚雄彝绣范畴，请直接说明“未识别到楚雄彝族纹样”。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name（纹样名称）和 meaning（文化寓意）。中文结果需包含中文纹样名称和中文文化寓意；英文结果需包含英文纹样名称和英文文化寓意。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
                                     },
                                     {
                                         type: 'image_url',
                                         image_url: {
-                                            url: base64Image
+                                            url: imageDataUrl
                                         }
                                     }
                                 ]
                             }
-                        ]
+                        ],
+                        response_format: {
+                            type: 'json_object'
+                        }
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API 请求失败: ${response.status} ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`API 请求失败: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ''}`);
                 }
 
                 const data = await response.json();
