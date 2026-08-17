@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定制彝绣 | Yi Pattern Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --yi-red: #b51111;
+            --yi-yellow: #f5d547;
+            --yi-gold: #d4af37;
+            --yi-black: #121212;
+            --yi-dark-red: #540707;
+            --panel-bg: rgba(16, 16, 16, 0.84);
+            --panel-border: rgba(212, 175, 55, 0.2);
+            --text-soft: rgba(255, 255, 255, 0.76);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --shadow-soft: 0 24px 48px rgba(0, 0, 0, 0.38), 0 0 36px rgba(212, 175, 55, 0.08);
+        }
+
+        body {
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            color: #fff;
+            background:
+                radial-gradient(circle at top left, rgba(181, 17, 17, 0.22), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(245, 213, 71, 0.1), transparent 28%),
+                linear-gradient(180deg, #050505 0%, #111 100%);
+            overflow-x: hidden;
+        }
+
+        .page-shell {
+            position: relative;
+            min-height: 100vh;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(181, 17, 17, 0.05) 10px, rgba(181, 17, 17, 0.05) 20px),
+                repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(245, 213, 71, 0.03) 10px, rgba(245, 213, 71, 0.03) 20px);
+        }
+
+        .page-shell::before,
+        .page-shell::after {
+            content: '';
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            border: 1px solid rgba(212, 175, 55, 0.08);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+
+        .page-shell::before {
+            top: 80px;
+            left: -180px;
+            background: radial-gradient(circle, rgba(181, 17, 17, 0.16), transparent 70%);
+        }
+
+        .page-shell::after {
+            right: -160px;
+            bottom: 40px;
+            background: radial-gradient(circle, rgba(245, 213, 71, 0.08), transparent 70%);
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(14px);
+            background: linear-gradient(to bottom, rgba(18, 18, 18, 0.96), rgba(18, 18, 18, 0.64));
+            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+        }
+
+        .nav-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .brand-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-red), var(--yi-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 999px;
+            color: var(--yi-yellow);
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.24);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .home-link:hover {
+            transform: translateY(-2px);
+            border-color: rgba(212, 175, 55, 0.56);
+            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.12);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 4rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.9rem;
+            margin-bottom: 1rem;
+            border-radius: 999px;
+            font-size: 0.86rem;
+            letter-spacing: 2px;
+            color: var(--yi-yellow);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .hero-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: clamp(2.2rem, 5.6vw, 4rem);
+            line-height: 1.15;
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, var(--yi-yellow) 0%, var(--yi-red) 52%, var(--yi-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            max-width: 720px;
+            margin: 0 auto;
+            font-size: 1rem;
+            line-height: 1.85;
+            color: var(--text-soft);
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .panel {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 1.4rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(245, 213, 71, 0.72), transparent);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .panel-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.35rem;
+            color: var(--yi-yellow);
+        }
+
+        .panel-note {
+            font-size: 0.94rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            white-space: nowrap;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            color: #171717;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+        }
+
+        .prompt-field {
+            margin-top: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .prompt-label,
+        .chip-title,
+        .tips-title,
+        .api-title,
+        .result-label {
+            display: block;
+            font-size: 0.85rem;
+            letter-spacing: 1.8px;
+            color: var(--yi-yellow);
+            margin-bottom: 0.75rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            resize: vertical;
+            padding: 1rem 1.05rem;
+            border-radius: 18px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(0, 0, 0, 0.26);
+            color: white;
+            outline: none;
+            font: inherit;
+            line-height: 1.75;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        textarea:focus {
+            border-color: rgba(245, 213, 71, 0.72);
+            box-shadow: 0 0 0 3px rgba(245, 213, 71, 0.08);
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .chip {
+            border: 1px solid rgba(212, 175, 55, 0.24);
+            background: rgba(255, 255, 255, 0.04);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .chip:hover {
+            transform: translateY(-2px);
+            border-color: rgba(245, 213, 71, 0.6);
+            background: rgba(181, 17, 17, 0.14);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+
+        .primary-btn,
+        .ghost-btn,
+        .download-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 0.9rem 1.4rem;
+            font-size: 0.96rem;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease, border-color 0.25s ease;
+            text-decoration: none;
+        }
+
+        .primary-btn {
+            color: #171717;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+            box-shadow: 0 12px 24px rgba(212, 175, 55, 0.22);
+        }
+
+        .ghost-btn,
+        .download-btn {
+            color: white;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .primary-btn:hover,
+        .ghost-btn:hover,
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .tips-box,
+        .api-box,
+        .result-meta {
+            border-radius: 18px;
+            border: 1px solid rgba(212, 175, 55, 0.14);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem 1.05rem;
+        }
+
+        .tips-box p,
+        .api-box p,
+        .result-meta p {
+            color: var(--text-soft);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .result-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 100%;
+        }
+
+        .result-stage {
+            position: relative;
+            min-height: 460px;
+            border-radius: 22px;
+            border: 1px dashed rgba(212, 175, 55, 0.26);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(181, 17, 17, 0.06)),
+                rgba(0, 0, 0, 0.2);
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+        }
+
+        .result-stage::before {
+            content: '';
+            position: absolute;
+            inset: 24px;
+            border: 1px solid rgba(212, 175, 55, 0.08);
+            border-radius: 18px;
+            pointer-events: none;
+        }
+
+        .placeholder-state,
+        .generated-state {
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+        }
+
+        .placeholder-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .placeholder-icon {
+            width: 132px;
+            height: 132px;
+            border-radius: 28px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            background:
+                radial-gradient(circle at center, rgba(245, 213, 71, 0.16), rgba(181, 17, 17, 0.08) 45%, transparent 78%),
+                rgba(0, 0, 0, 0.32);
+            box-shadow: inset 0 0 48px rgba(212, 175, 55, 0.06);
+        }
+
+        .placeholder-icon svg {
+            width: 88px;
+            height: 88px;
+        }
+
+        .placeholder-state strong {
+            font-size: 1.12rem;
+        }
+
+        .placeholder-state p {
+            max-width: 420px;
+            line-height: 1.8;
+            color: var(--text-soft);
+        }
+
+        .generated-state {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .generated-frame {
+            position: relative;
+            flex: 1;
+            min-height: 380px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+        }
+
+        .generated-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .frame-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            color: var(--yi-yellow);
+            background: rgba(18, 18, 18, 0.75);
+            border: 1px solid rgba(212, 175, 55, 0.24);
+        }
+
+        .download-btn[aria-disabled="true"] {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            color: var(--yi-yellow);
+            background: rgba(0, 0, 0, 0.22);
+            padding: 0.12rem 0.35rem;
+            border-radius: 6px;
+        }
+
+        .footer-note {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.75;
+        }
+
+        @media (max-width: 980px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-content,
+            .panel-header,
+            .action-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .container {
+                padding: 2rem 1rem 3rem;
+            }
+
+            .panel {
+                padding: 1.1rem;
+            }
+
+            .home-link,
+            .primary-btn,
+            .ghost-btn,
+            .download-btn {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .result-stage {
+                min-height: 380px;
+            }
+
+            .generated-frame {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="brand">
+                    <div class="brand-title">定制彝绣</div>
+                    <div class="brand-subtitle">YI PATTERN DESIGN</div>
+                </div>
+                <a class="home-link" href="../index.html">← 返回首页</a>
+            </div>
+        </nav>
+
+        <main class="container">
+            <section class="hero">
+                <div class="hero-kicker">✦ AI 文生图体验</div>
+                <h1 class="hero-title">定制彝绣</h1>
+                <p class="hero-desc">输入创意，生成彝绣风格图案。当前页面先提供纯静态 UI 框架与交互占位，后续可直接接入阿里云百炼 Wanx 文生图接口。</p>
+            </section>
+
+            <section class="workspace">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2 class="panel-title">创意输入区</h2>
+                            <p class="panel-note">先描述主体、氛围、颜色与装饰元素，再补充“彝绣风格”等关键词，更容易得到稳定的民族纹样视觉方向。</p>
+                        </div>
+                        <span class="status-pill">静态框架</span>
+                    </div>
+
+                    <div class="prompt-field">
+                        <label class="prompt-label" for="promptInput">创意描述</label>
+                        <textarea id="promptInput" placeholder="如&#34;一只可爱的熊猫，彝绣风格，传统纹样装饰&#34;"></textarea>
+                    </div>
+
+                    <div>
+                        <span class="chip-title">风格快捷标签</span>
+                        <div class="chip-group" id="styleChips">
+                            <button class="chip" type="button" data-style="传统彝绣">传统彝绣</button>
+                            <button class="chip" type="button" data-style="现代简约">现代简约</button>
+                            <button class="chip" type="button" data-style="节庆盛装">节庆盛装</button>
+                            <button class="chip" type="button" data-style="自然纹样">自然纹样</button>
+                        </div>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="primary-btn" id="generateBtn" type="button">生成图案</button>
+                        <button class="ghost-btn" id="clearBtn" type="button">清空描述</button>
+                    </div>
+
+                    <div class="tips-box">
+                        <span class="tips-title">使用建议</span>
+                        <p>可以尝试加入颜色、服饰工艺、节庆场景、几何花纹等描述，例如“黑红金主色、八角花纹、对称构图、节庆披肩图案”。这样更贴近彝绣视觉语汇。</p>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <h2 class="panel-title">生成结果展示区</h2>
+                            <p class="panel-note">初始状态显示装饰占位；后续接入 API 后，这里可展示真实生成图片，并支持点击下载保存。</p>
+                        </div>
+                        <span class="status-pill" id="resultStatus">等待生成</span>
+                    </div>
+
+                    <div class="result-wrap">
+                        <div class="result-stage">
+                            <div class="placeholder-state" id="placeholderState">
+                                <div class="placeholder-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect x="18" y="18" width="84" height="84" rx="10" stroke="rgba(245,213,71,0.7)" stroke-width="2"/>
+                                        <path d="M60 24L72 40L96 48L80 60L96 72L72 80L60 96L48 80L24 72L40 60L24 48L48 40L60 24Z" fill="rgba(181,17,17,0.55)" stroke="rgba(245,213,71,0.8)" stroke-width="2"/>
+                                        <circle cx="60" cy="60" r="10" fill="rgba(245,213,71,0.78)"/>
+                                        <path d="M60 34V86M34 60H86M41 41L79 79M79 41L41 79" stroke="rgba(18,18,18,0.55)" stroke-width="2"/>
+                                    </svg>
+                                </div>
+                                <strong>等待生成彝绣图案</strong>
+                                <p>输入创意描述后点击“生成图案”。当前为静态演示页面，会先生成本地占位图，便于确认交互与版式结构。</p>
+                            </div>
+
+                            <div class="generated-state" id="generatedState">
+                                <div class="generated-frame">
+                                    <span class="frame-badge">可点击下方按钮下载</span>
+                                    <img id="resultImage" alt="生成的彝绣风格图案预览">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="result-meta">
+                            <span class="result-label">当前提示词</span>
+                            <p id="resultPrompt">尚未生成内容。</p>
+                        </div>
+
+                        <a class="download-btn" id="downloadBtn" href="#" download="yi-pattern-design.png" aria-disabled="true">下载生成图片</a>
+
+                        <div class="api-box">
+                            <span class="api-title">API 接口预留说明</span>
+                            <p>页面底部脚本中已预留 <code>WANX_API_KEY</code>、<code>WANX_API_URL</code> 与 <code>generateWithWanx</code> 位置。后续只需将阿里云百炼 Wanx 文生图 API Key 填入对应常量，并在该函数中补全真实请求逻辑，即可替换当前本地占位图生成流程。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <p class="footer-note">本页为静态 HTML / CSS / Vanilla JS 实现，不依赖外部库，便于后续直接嵌入真实文生图接口。</p>
+        </main>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('promptInput');
+        const styleChips = document.querySelectorAll('#styleChips .chip');
+        const generateBtn = document.getElementById('generateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const placeholderState = document.getElementById('placeholderState');
+        const generatedState = document.getElementById('generatedState');
+        const resultImage = document.getElementById('resultImage');
+        const resultPrompt = document.getElementById('resultPrompt');
+        const resultStatus = document.getElementById('resultStatus');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        styleChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                const styleText = chip.dataset.style;
+                const currentValue = promptInput.value.trim();
+
+                if (!currentValue) {
+                    promptInput.value = styleText;
+                } else if (!currentValue.includes(styleText)) {
+                    promptInput.value = `${currentValue}，${styleText}`;
+                }
+
+                promptInput.focus();
+            });
+        });
+
+        clearBtn.addEventListener('click', () => {
+            promptInput.value = '';
+            promptInput.focus();
+        });
+
+        function escapeXml(value) {
+            return value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        function createPreviewSvg(prompt) {
+            const safePrompt = escapeXml(prompt);
+            const shortPrompt = safePrompt.length > 42 ? `${safePrompt.slice(0, 42)}...` : safePrompt;
+            return `
+                <svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="1200" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#120909"/>
+                            <stop offset="0.5" stop-color="#4D0909"/>
+                            <stop offset="1" stop-color="#1A1A1A"/>
+                        </linearGradient>
+                        <linearGradient id="gold" x1="180" y1="120" x2="1020" y2="1080" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#F5D547"/>
+                            <stop offset="1" stop-color="#D4AF37"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="1200" height="1200" rx="48" fill="url(#bg)"/>
+                    <rect x="70" y="70" width="1060" height="1060" rx="36" stroke="url(#gold)" stroke-width="6" stroke-opacity="0.55"/>
+                    <rect x="130" y="130" width="940" height="940" rx="26" stroke="#F5D547" stroke-opacity="0.18" stroke-width="2"/>
+                    <path d="M600 180L684 292L852 348L740 460L852 572L684 628L600 740L516 628L348 572L460 460L348 348L516 292L600 180Z" fill="#B51111" fill-opacity="0.72" stroke="url(#gold)" stroke-width="16"/>
+                    <circle cx="600" cy="460" r="66" fill="#F5D547" fill-opacity="0.92"/>
+                    <circle cx="600" cy="460" r="24" fill="#8B0000" fill-opacity="0.82"/>
+                    <path d="M600 246V674M386 460H814M430 290L770 630M770 290L430 630" stroke="#171717" stroke-opacity="0.52" stroke-width="14"/>
+                    <path d="M245 880C345 778 462 728 600 728C738 728 855 778 955 880" stroke="url(#gold)" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M300 936C390 860 490 822 600 822C710 822 810 860 900 936" stroke="#B51111" stroke-width="16" stroke-linecap="round"/>
+                    <path d="M230 1020H970" stroke="#F5D547" stroke-opacity="0.35" stroke-width="4" stroke-dasharray="18 18"/>
+                    <text x="600" y="1038" text-anchor="middle" fill="#F5D547" fill-opacity="0.88" font-size="40" font-family="Noto Sans SC, Microsoft YaHei, sans-serif">${shortPrompt}</text>
+                </svg>
+            `.trim();
+        }
+
+        function svgToDataUrl(svg) {
+            return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        }
+
+        async function generatePreviewImage(prompt) {
+            const svg = createPreviewSvg(prompt);
+            return svgToDataUrl(svg);
+        }
+
+        /*
+         * ================= Wanx API 接口预留区域 =================
+         * 1. 将你的阿里云百炼 Wanx API Key 填入 WANX_API_KEY。
+         * 2. 按实际模型修改 WANX_API_URL / 请求 body。
+         * 3. 在 generateWithWanx(prompt) 中完成 fetch 请求并返回图片 URL 或 base64 数据。
+         * 4. 然后把 handleGenerate() 中的 generatePreviewImage(prompt) 替换为 generateWithWanx(prompt)。
+         */
+        const WANX_API_KEY = ''; // 例如：'sk-xxxx'，请在这里填入阿里云百炼 Wanx 文生图 API Key
+        const WANX_API_URL = ''; // 例如：'https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis'
+
+        async function generateWithWanx(prompt) {
+            // 示例占位：后续在这里接入真实的 Wanx 文生图接口。
+            // return fetch(WANX_API_URL, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Authorization': `Bearer ${WANX_API_KEY}`,
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         prompt
+            //     })
+            // }).then(res => res.json());
+            throw new Error('Wanx API 尚未接入，请先填写 API Key 并补全请求逻辑。');
+        }
+
+        async function handleGenerate() {
+            const prompt = promptInput.value.trim();
+
+            if (!prompt) {
+                window.alert('请先输入创意描述，再生成图案。');
+                promptInput.focus();
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '生成中...';
+            resultStatus.textContent = '正在生成';
+            resultPrompt.textContent = prompt;
+
+            try {
+                // 当前先使用本地 SVG 占位图模拟生成结果。
+                // 接入真实接口时，将下一行替换为：const imageUrl = await generateWithWanx(prompt);
+                const imageUrl = await generatePreviewImage(prompt);
+
+                resultImage.src = imageUrl;
+                placeholderState.style.display = 'none';
+                generatedState.style.display = 'flex';
+                downloadBtn.href = imageUrl;
+                downloadBtn.setAttribute('aria-disabled', 'false');
+                resultStatus.textContent = '生成完成';
+            } catch (error) {
+                window.alert(error.message || '生成失败，请稍后重试。');
+                resultStatus.textContent = '生成失败';
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成图案';
+            }
+        }
+
+        generateBtn.addEventListener('click', handleGenerate);
+
+        promptInput.addEventListener('keydown', event => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                handleGenerate();
+            }
+        });
+    </script>
+</body>
+</html>
