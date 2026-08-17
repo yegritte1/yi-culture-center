@@ -486,6 +486,22 @@
             color: #ffcfbf;
         }
 
+        .status-pill.loading::before {
+            content: '';
+            width: 0.82rem;
+            height: 0.82rem;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 207, 191, 0.32);
+            border-top-color: var(--yi-yellow);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         code {
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
             color: var(--yi-yellow);
@@ -567,8 +583,8 @@
                 <div class="hero-kicker">✦ AI 文化识别体验</div>
                 <h1 class="hero-title">上传彝绣照片，识别纹样并解读文化寓意</h1>
                 <p class="hero-desc">
-                    这是「彝绣识别」页面的前端 UI 框架版本，已预留图片上传、结果展示与双语切换区域。
-                    后续只需补入视觉大模型 API key 与调用逻辑，即可将页面接入真实识别能力。
+                    上传纹样清晰的彝绣照片后，页面将调用阿里云百炼 Qwen-VL 视觉大模型，
+                    识别纹样类别并生成中英双语文化寓意解析。
                 </p>
             </section>
 
@@ -585,7 +601,7 @@
                         <div class="upload-placeholder" id="uploadPlaceholder">
                             <div class="upload-icon">🧵</div>
                             <strong>点击上传或拖拽彝绣纹样图片到这里</strong>
-                            <p>支持常见图片格式。当前为 UI 演示框架，上传后可本地预览，点击“开始识别”可查看预置的演示结果与后续 API 接入位置。</p>
+                            <p>支持常见图片格式。上传后可本地预览，点击“开始识别”将调用 Qwen-VL 视觉大模型识别彝绣纹样。</p>
                         </div>
                         <div class="preview-wrapper" id="previewWrapper" hidden>
                             <span class="preview-badge">已载入待识别图片</span>
@@ -607,12 +623,12 @@
                             <button class="lang-btn" type="button" data-lang="en">English</button>
                         </div>
                     </div>
-                    <p class="panel-note">结果区预留了“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。当前未接入真实模型时，会展示示例数据。</p>
+                    <p class="panel-note">结果区展示“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。识别结果由 Qwen-VL 根据上传图片实时生成。</p>
 
                     <div class="result-state">
                         <div class="result-placeholder" id="resultPlaceholder">
                             <strong>等待识别结果</strong>
-                            <p>请先上传一张彝绣纹样照片，然后点击“开始识别”。接入 API 后，这里会显示模型返回的纹样名称、文化寓意说明以及可扩展的置信度等信息。</p>
+                            <p>请先上传一张彝绣纹样照片，然后点击“开始识别”。识别过程中会显示加载状态，完成后这里会显示纹样名称与中英双语文化寓意。</p>
                         </div>
 
                         <div class="result-card" id="resultCard">
@@ -623,7 +639,7 @@
                                 </div>
                                 <div class="meta-item">
                                     <div class="meta-label">识别状态 / Status</div>
-                                    <div class="meta-value" id="patternStatus">演示结果（待接入真实 API）</div>
+                                    <div class="meta-value" id="patternStatus">识别结果（由 Qwen-VL 生成）</div>
                                 </div>
                             </div>
 
@@ -645,14 +661,6 @@
                 </div>
             </section>
 
-            <section class="panel" style="margin-top: 1.5rem;">
-                <h2 class="panel-title" style="margin-bottom: 1rem;">API 接口预留说明</h2>
-                <div class="api-block">
-                    <p>页面底部脚本中已预留清晰注释，可直接将视觉大模型的调用逻辑补入 <code>callVisionModel</code> 函数。后续只需填入 API 地址、API key、模型名以及返回结果解析方式，即可完成接入。</p>
-                    <p style="margin-top: 0.7rem;">推荐流程：读取上传图片 → 转成 Base64 或上传 URL → 调用视觉大模型 → 返回纹样名称与寓意说明 → 更新当前结果面板。</p>
-                </div>
-                <p class="footer-note">当前版本为静态前端框架，无外部依赖，适合直接嵌入现有静态站点继续迭代。</p>
-            </section>
         </main>
     </div>
 
@@ -672,23 +680,56 @@
         const statusPill = document.querySelector('.status-pill');
         const langButtons = document.querySelectorAll('.lang-btn');
 
+        const API_KEY = 'sk-ws-H.EPHHMEY.gUIC.MEQCIFkmdOHiMWFgzAkvEnMslz30m5P8mezeUV1gvFJxlg1dAiBj22y1NA4QGp-UdH1BH0GcBE_GxCNSWgu9fWUEqfEz7w';
+        const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+        const MODEL_NAME = 'qwen2.5-vl-7b-instruct';
+
         let currentLanguage = 'zh';
         let currentImageFile = null;
-
-        const demoResult = {
-            zh: {
-                name: '火焰纹（示例）',
-                meaning: '火焰纹在彝族刺绣中常象征光明、生命力与祖先精神的延续，也常被理解为对温暖、丰收与家庭守护的祈愿。不同地域支系会在针法、配色与构图上呈现各自特色。'
-            },
-            en: {
-                name: 'Flame Motif (Demo)',
-                meaning: 'In Yi embroidery, the flame motif often symbolizes light, vitality, and the continuation of ancestral spirit. It can also represent wishes for warmth, abundance, and family protection. Different regional groups may express it with distinct stitches, colors, and compositions.'
-            }
-        };
+        let recognitionResult = null;
 
         function updateResult(language) {
-            patternName.textContent = demoResult[language].name;
-            meaningText.textContent = demoResult[language].meaning;
+            if (!recognitionResult) return;
+            patternName.textContent = recognitionResult[language].name;
+            meaningText.textContent = recognitionResult[language].meaning;
+        }
+
+        function normalizeRecognitionResult(result) {
+            return {
+                zh: {
+                    name: result?.zh?.name || '未能确认纹样名称',
+                    meaning: result?.zh?.meaning || '模型未返回完整中文寓意，请更换更清晰的纹样图片后重试。'
+                },
+                en: {
+                    name: result?.en?.name || 'Pattern not identified',
+                    meaning: result?.en?.meaning || 'The model did not return a complete English cultural meaning. Please try again with a clearer pattern image.'
+                }
+            };
+        }
+
+        function showFriendlyError(error) {
+            recognitionResult = {
+                zh: {
+                    name: '识别未完成',
+                    meaning: `抱歉，识别过程中出现问题。请检查网络连接，或稍后重新上传图片再试。错误信息：${error.message || '未知错误'}`
+                },
+                en: {
+                    name: 'Recognition not completed',
+                    meaning: `Sorry, something went wrong during recognition. Please check your network connection or try again later with the image. Error: ${error.message || 'Unknown error'}`
+                }
+            };
+            updateResult(currentLanguage);
+            resultPlaceholder.style.display = 'none';
+            resultCard.style.display = 'flex';
+        }
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
         }
 
         function showPreview(file) {
@@ -738,6 +779,7 @@
         resetBtn.addEventListener('click', () => {
             imageInput.value = '';
             currentImageFile = null;
+            recognitionResult = null;
             previewImage.removeAttribute('src');
             previewWrapper.hidden = true;
             uploadPlaceholder.hidden = false;
@@ -746,7 +788,8 @@
             resultCard.style.display = 'none';
             resultPlaceholder.style.display = 'flex';
             statusPill.textContent = '等待上传';
-            patternStatus.textContent = '演示结果（待接入真实 API）';
+            statusPill.classList.remove('loading');
+            patternStatus.textContent = '识别结果（由 Qwen-VL 生成）';
         });
 
         langButtons.forEach(button => {
@@ -754,7 +797,7 @@
                 langButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
                 currentLanguage = button.dataset.lang;
-                if (resultCard.style.display === 'flex') {
+                if (recognitionResult) {
                     updateResult(currentLanguage);
                 }
             });
@@ -763,71 +806,73 @@
         recognizeBtn.addEventListener('click', async () => {
             if (!currentImageFile) return;
 
-            statusPill.textContent = '识别演示中';
-            patternStatus.textContent = '正在调用识别流程占位逻辑…';
+            statusPill.textContent = '识别中...';
+            statusPill.classList.add('loading');
+            patternStatus.textContent = '正在通过 Qwen-VL 视觉大模型识别纹样...';
             recognizeBtn.disabled = true;
             recognizeBtn.textContent = '识别中...';
+            resultCard.style.display = 'none';
+            resultPlaceholder.style.display = 'flex';
 
             try {
-                // 当前为演示逻辑：模拟识别延时。
-                await new Promise(resolve => setTimeout(resolve, 700));
+                const base64Image = await fileToBase64(currentImageFile);
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: [
+                                    {
+                                        type: 'text',
+                                        text: '请识别这张图片中的彝族纹样类别（例如八角纹、山茶花纹、火焰纹、羊角纹等），并给出中英双语的文化寓意解析。请以 JSON 格式返回结果，包含 zh 和 en 两个字段，每个字段内包含 name (纹样名称) 和 meaning (文化寓意说明)。请只输出 JSON 对象，不要包含 markdown 代码块或其他描述。'
+                                    },
+                                    {
+                                        type: 'image_url',
+                                        image_url: {
+                                            url: base64Image
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API 请求失败: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                let content = data.choices[0].message.content;
+                
+                // 尝试清洗可能存在的 markdown 代码块
+                content = content.replace(/```json\n?/, '').replace(/\n?```/, '').trim();
+                
+                recognitionResult = normalizeRecognitionResult(JSON.parse(content));
 
                 updateResult(currentLanguage);
                 resultPlaceholder.style.display = 'none';
                 resultCard.style.display = 'flex';
-                patternStatus.textContent = '演示结果（待接入真实 API）';
-                statusPill.textContent = '已完成演示';
+                patternStatus.textContent = '识别成功';
+                statusPill.textContent = '已识别';
             } catch (error) {
-                patternStatus.textContent = '识别失败，请检查后续 API 接入逻辑';
+                console.error('Recognition error:', error);
+                showFriendlyError(error);
+                patternStatus.textContent = '识别失败，请稍后重试';
                 statusPill.textContent = '识别异常';
-                console.error(error);
             } finally {
+                statusPill.classList.remove('loading');
                 recognizeBtn.disabled = false;
                 recognizeBtn.textContent = '开始识别';
             }
         });
-
-        /*
-         * ==================== API 接口预留位置 ====================
-         * 后续接入视觉大模型时，可将真实逻辑补入下方函数。
-         *
-         * 使用说明：
-         * 1. 将 YOUR_API_KEY 替换成你自己的平台密钥。
-         * 2. 将 apiUrl 替换为目标视觉大模型接口地址。
-         * 3. 根据平台要求，把图片转成 base64、文件 URL 或 multipart/form-data。
-         * 4. 在返回结果中解析出：纹样名称（name）、文化寓意说明（meaning_zh / meaning_en）。
-         * 5. 然后在 recognizeBtn 的点击事件里，用真实返回值替换 demoResult 更新 UI。
-         *
-         * 示例伪代码：
-         *
-         * async function callVisionModel(imageBase64) {
-         *   const apiKey = 'YOUR_API_KEY';
-         *   const apiUrl = 'https://your-vision-api-endpoint';
-         *
-         *   const response = await fetch(apiUrl, {
-         *     method: 'POST',
-         *     headers: {
-         *       'Content-Type': 'application/json',
-         *       'Authorization': `Bearer ${apiKey}`
-         *     },
-         *     body: JSON.stringify({
-         *       model: 'your-vision-model-name',
-         *       image: imageBase64,
-         *       prompt: '请识别这张彝绣图片中的纹样类别，并分别输出中文/英文名称与文化寓意说明。'
-         *     })
-         *   });
-         *
-         *   const data = await response.json();
-         *   return {
-         *     nameZh: data.nameZh,
-         *     nameEn: data.nameEn,
-         *     meaningZh: data.meaningZh,
-         *     meaningEn: data.meaningEn
-         *   };
-         * }
-         *
-         * ==========================================================
-         */
     </script>
 </body>
 </html>
