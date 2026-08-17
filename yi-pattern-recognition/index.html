@@ -427,6 +427,25 @@
             display: none;
             flex-direction: column;
             gap: 1rem;
+            max-height: 540px;
+            overflow-y: auto;
+            padding-right: 0.35rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(212, 175, 55, 0.45) rgba(255, 255, 255, 0.04);
+        }
+
+        .result-card::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .result-card::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 999px;
+        }
+
+        .result-card::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.45);
+            border-radius: 999px;
         }
 
         .meta-grid {
@@ -454,6 +473,44 @@
 
         .detail-block {
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(181, 17, 17, 0.045));
+            cursor: pointer;
+        }
+
+        .detail-block summary {
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .detail-block summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .detail-block summary::after {
+            content: '+';
+            width: 1.45rem;
+            height: 1.45rem;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            color: #171717;
+            background: linear-gradient(135deg, var(--yi-yellow), var(--yi-gold));
+            font-weight: 700;
+            flex: 0 0 auto;
+        }
+
+        .detail-block[open] summary::after {
+            content: '−';
+        }
+
+        .detail-block .detail-text {
+            margin-top: 0.75rem;
+        }
+
+        .detail-block summary .block-label {
+            margin-bottom: 0;
         }
 
         .detail-block.wide {
@@ -601,7 +658,7 @@
                 <h1 class="hero-title">上传彝绣照片，匹配纹样并解读文化寓意</h1>
                 <p class="hero-desc">
                     上传纹样清晰的彝绣照片后，页面将通过本地图片特征匹配技术，
-                    从数字画廊中寻找最相似的楚雄彝族传统纹样；若本地未命中，再调用 Qwen-VL 进行补充识别。
+                    从数字画廊中寻找最相似的楚雄彝族传统纹样；必要时再调用 Qwen-VL 进行补充分析。
                 </p>
             </section>
 
@@ -640,7 +697,7 @@
                             <button class="lang-btn" type="button" data-lang="en">English</button>
                         </div>
                     </div>
-                    <p class="panel-note">结果区展示“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。识别流程会优先从数字画廊库中本地匹配，未命中时再调用 Qwen-VL 补充识别。</p>
+                    <p class="panel-note">结果区展示“纹样名称”和“文化寓意说明”两个核心字段，支持中英双语切换。识别流程会优先分析纹样视觉特征，必要时再调用 Qwen-VL 补充解读。</p>
 
                     <div class="result-state">
                         <div class="result-placeholder" id="resultPlaceholder">
@@ -656,7 +713,7 @@
                                 </div>
                                 <div class="meta-item">
                                     <div class="meta-label">识别状态 / Status</div>
-                                    <div class="meta-value" id="patternStatus">识别结果（本地匹配优先，必要时调用 Qwen-VL）</div>
+                                    <div class="meta-value" id="patternStatus">等待识别</div>
                                 </div>
                             </div>
 
@@ -666,22 +723,22 @@
                             </div>
 
                             <div class="detail-grid" id="detailGrid">
-                                <div class="detail-block">
-                                    <div class="block-label" id="aliasLabel">别名 / Alias</div>
+                                <details class="detail-block">
+                                    <summary><span class="block-label" id="aliasLabel">别名 / Alias</span></summary>
                                     <div class="detail-text" id="aliasText">--</div>
-                                </div>
-                                <div class="detail-block">
-                                    <div class="block-label" id="originLabel">溯源与历史 / Origins & History</div>
+                                </details>
+                                <details class="detail-block">
+                                    <summary><span class="block-label" id="originLabel">溯源与历史 / Origins & History</span></summary>
                                     <div class="detail-text" id="originText">--</div>
-                                </div>
-                                <div class="detail-block">
-                                    <div class="block-label" id="visualLabel">视觉构成 / Visual Composition</div>
+                                </details>
+                                <details class="detail-block">
+                                    <summary><span class="block-label" id="visualLabel">视觉构成 / Visual Composition</span></summary>
                                     <div class="detail-text" id="visualText">--</div>
-                                </div>
-                                <div class="detail-block">
-                                    <div class="block-label" id="usageLabel">应用与传承 / Application & Heritage</div>
+                                </details>
+                                <details class="detail-block">
+                                    <summary><span class="block-label" id="usageLabel">应用与传承 / Application & Heritage</span></summary>
                                     <div class="detail-text" id="usageText">--</div>
-                                </div>
+                                </details>
                             </div>
                         </div>
                     </div>
@@ -710,6 +767,7 @@
         const usageText = document.getElementById('usageText');
         const statusPill = document.querySelector('.status-pill');
         const langButtons = document.querySelectorAll('.lang-btn');
+        const initialPlaceholderHtml = resultPlaceholder.innerHTML;
 
         const API_KEY = 'sk-ws-H.EPHHMEY.gUIC.MEQCIFkmdOHiMWFgzAkvEnMslz30m5P8mezeUV1gvFJxlg1dAiBj22y1NA4QGp-UdH1BH0GcBE_GxCNSWgu9fWUEqfEz7w';
         const API_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
@@ -795,6 +853,10 @@
             originText.textContent = result.origin || '--';
             visualText.textContent = result.visual || '--';
             usageText.textContent = result.usage || '--';
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         function normalizeRecognitionResult(result) {
@@ -1006,9 +1068,10 @@
             recognizeBtn.disabled = true;
             resultCard.style.display = 'none';
             resultPlaceholder.style.display = 'flex';
+            resultPlaceholder.innerHTML = initialPlaceholderHtml;
             statusPill.textContent = '等待上传';
             statusPill.classList.remove('loading');
-            patternStatus.textContent = '识别结果（本地匹配优先，必要时调用 Qwen-VL）';
+            patternStatus.textContent = '等待识别';
         });
 
         langButtons.forEach(button => {
@@ -1027,13 +1090,15 @@
 
             statusPill.textContent = '识别中...';
             statusPill.classList.add('loading');
-            patternStatus.textContent = '正在进行本地纹样匹配...';
+            patternStatus.textContent = '正在分析纹样特征...';
             recognizeBtn.disabled = true;
             recognizeBtn.textContent = '识别中...';
             resultCard.style.display = 'none';
             resultPlaceholder.style.display = 'flex';
+            resultPlaceholder.innerHTML = '<strong>识别中...</strong><p>正在分析纹样特征…请稍候，系统将提取图案结构、色彩与文化线索。</p>';
 
             try {
+                await delay(2000);
                 const imageDataUrl = await fileToJpegDataUrl(currentImageFile);
                 const localMatch = await findLocalPatternMatch(imageDataUrl);
 
@@ -1045,9 +1110,9 @@
                     patternStatus.textContent = '✓ 识别成功';
                     statusPill.textContent = '已识别';
                 } else {
-                    patternStatus.textContent = '本地未匹配，正在调用 Qwen-VL 识别...';
+                    patternStatus.textContent = '正在进行深度识别...';
                     recognitionResult = await callQwenVisionModel(imageDataUrl);
-                    patternStatus.textContent = 'AI 识别成功';
+                    patternStatus.textContent = '✓ 识别成功';
                     statusPill.textContent = '已识别';
                 }
 
